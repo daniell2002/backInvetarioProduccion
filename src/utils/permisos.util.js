@@ -27,6 +27,8 @@ export const MODULOS = Object.freeze({
   ORDENES_DESPACHO: "ordenes_despacho",
   MAQUINAS: "maquinas",
   INVENTARIO: "inventario",
+  FICHAS_PRODUCCION: "fichas_produccion",
+  PRODUCCION: "produccion",
 });
 
 /**

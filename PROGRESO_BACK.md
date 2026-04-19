@@ -8,9 +8,9 @@
 
 | Métrica                 | Valor     |
 | ----------------------- | --------- |
-| Módulos completados     | 15 / 15   |
-| Endpoints implementados | ~70       |
-| Modelos creados         | 14        |
+| Módulos completados     | 17 / 17   |
+| Endpoints implementados | ~89       |
+| Modelos creados         | 16        |
 | Tests                   | Pendiente |
 
 ---
@@ -124,16 +124,35 @@
 - Modelo Stock {productoId, sedeId} con índice compuesto único
 - 3 rutas: stock por sede, stock global (aggregation), stock por producto
 
+### 16. Fichas de Producción ✅
+
+- Modelo FichaProduccion con materiales embebidos (receta / BOM)
+- Flujo: pendiente → aprobada → obsoleta
+- 9 rutas: CRUD + aprobar + obsoletar + fichas aprobadas por producto + paginado
+- Solo fichas aprobadas pueden usarse en producciones
+- Código auto: FPR-00001
+
+### 17. Producción ✅
+
+- Modelo Produccion con materiales, lotes de costo y equivalencias
+- Flujo: borrador → en_proceso → completada | anulada
+- 9 rutas: crear, listar, paginado, obtener, iniciar, completar, anular, proyectar, estimar-costo
+- Completar genera salida (materiales) + entrada (producto fabricado) en transacción
+- Anular revierte movimientos si estaba completada
+- Cálculo de costos por promedio ponderado de entradas (maneja precios mixtos de proveedores)
+- Equivalencias de presentaciones (rollos→metros, cajas→unidades, etc.)
+- Proyección: cuánto puedo fabricar con el stock actual + cuello de botella
+- Estimación de costo previo a producir
+- Código auto: PROD-00001
+
 ---
 
 ## 🔮 Módulos Futuros
 
-| Módulo                 | Prioridad | Notas                                                |
-| ---------------------- | --------- | ---------------------------------------------------- |
-| Producción             | Alta      | Transformación de materia prima → producto terminado |
-| Costos                 | Alta      | Cálculo de costos de producción                      |
-| Reportes avanzados     | Media     | Kardex, movimientos, valorización                    |
-| Dashboard estadísticas | Media     | KPIs del backend                                     |
+| Módulo                 | Prioridad | Notas                             |
+| ---------------------- | --------- | --------------------------------- |
+| Reportes avanzados     | Media     | Kardex, movimientos, valorización |
+| Dashboard estadísticas | Media     | KPIs del backend                  |
 
 ---
 
@@ -141,5 +160,5 @@
 
 - El frontend actual usa Pinia stores en memoria (sin API). Hay que conectarlo al backend.
 - El sistema NO es multi-tenant. Es una sola empresa con múltiples sedes.
-- El módulo de producción se definirá más adelante.
-- Los productos deben soportar presentaciones (cajas, rollos, láminas) para el futuro módulo de producción.
+- Los productos soportan presentaciones (cajas, rollos, láminas) que el módulo de producción usa para equivalencias.
+- El módulo de producción calcula costos reales considerando mezcla de proveedores/precios.

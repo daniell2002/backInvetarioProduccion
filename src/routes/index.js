@@ -13,6 +13,8 @@ import ajusteInventarioRoutes from "./ajusteInventario.routes.js";
 import ordenDespachoRoutes from "./ordenDespacho.routes.js";
 import maquinaRoutes from "./maquina.routes.js";
 import inventarioRoutes from "./inventario.routes.js";
+import fichaProduccionRoutes from "./fichaProduccion.routes.js";
+import produccionRoutes from "./produccion.routes.js";
 
 const rutasPrincipales = async (fastify, opciones) => {
   // ─── Rutas sin autenticación ─────────────────────────────
@@ -37,6 +39,10 @@ const rutasPrincipales = async (fastify, opciones) => {
   });
   await fastify.register(maquinaRoutes, { prefix: "/v1/maquinas" });
   await fastify.register(inventarioRoutes, { prefix: "/v1/inventario" });
+  await fastify.register(fichaProduccionRoutes, {
+    prefix: "/v1/fichas-produccion",
+  });
+  await fastify.register(produccionRoutes, { prefix: "/v1/produccion" });
 
   // Ruta de health check
   fastify.get("/health", async () => ({

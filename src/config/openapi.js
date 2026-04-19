@@ -57,6 +57,16 @@ const configuracionBase = {
     },
     { name: "Máquinas", description: "Gestión de maquinaria" },
     { name: "Inventario", description: "Vista de stock por sede y global" },
+    {
+      name: "Fichas de Producción",
+      description:
+        "Recetas / BOM que definen materiales para producir un producto",
+    },
+    {
+      name: "Producción",
+      description:
+        "Órdenes de producción — transformación de materia prima en producto terminado",
+    },
   ],
   paths: {},
 };
