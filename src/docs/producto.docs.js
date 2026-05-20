@@ -77,6 +77,7 @@ const schemaListarProductos = {
             {
               _id: "67f9fdbb2f44a6c9c22d1001",
               codigoInterno: "PRD00001",
+              referencia: "PRD00001",
               nombre: "Disco de corte 7 pulgadas",
               activo: true,
             },
@@ -142,6 +143,7 @@ const schemaListarProductosPaginado = {
             {
               _id: "67f9fdbb2f44a6c9c22d1001",
               codigoInterno: "PRD00001",
+              referencia: "PRD00001",
               nombre: "Disco de corte 7 pulgadas",
               activo: true,
             },

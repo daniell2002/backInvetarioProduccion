@@ -11,7 +11,6 @@ import salidaRoutes from "./salida.routes.js";
 import trasladoRoutes from "./traslado.routes.js";
 import ajusteInventarioRoutes from "./ajusteInventario.routes.js";
 import ordenDespachoRoutes from "./ordenDespacho.routes.js";
-import maquinaRoutes from "./maquina.routes.js";
 import inventarioRoutes from "./inventario.routes.js";
 import fichaProduccionRoutes from "./fichaProduccion.routes.js";
 import produccionRoutes from "./produccion.routes.js";
@@ -37,7 +36,6 @@ const rutasPrincipales = async (fastify, opciones) => {
   await fastify.register(ordenDespachoRoutes, {
     prefix: "/v1/ordenes-despacho",
   });
-  await fastify.register(maquinaRoutes, { prefix: "/v1/maquinas" });
   await fastify.register(inventarioRoutes, { prefix: "/v1/inventario" });
   await fastify.register(fichaProduccionRoutes, {
     prefix: "/v1/fichas-produccion",

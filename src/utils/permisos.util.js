@@ -25,7 +25,6 @@ export const MODULOS = Object.freeze({
   TRASLADOS: "traslados",
   AJUSTES_INVENTARIO: "ajustes_inventario",
   ORDENES_DESPACHO: "ordenes_despacho",
-  MAQUINAS: "maquinas",
   INVENTARIO: "inventario",
   FICHAS_PRODUCCION: "fichas_produccion",
   PRODUCCION: "produccion",

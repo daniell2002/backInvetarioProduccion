@@ -6,7 +6,7 @@ const configuracionBase = {
     description:
       "API REST para gestión de inventario industrial multi-sede. " +
       "Incluye gestión de productos, entradas, salidas, traslados entre sedes, " +
-      "órdenes de compra, despacho, ajustes de inventario y maquinaria.",
+      "órdenes de compra, despacho y ajustes de inventario.",
     contact: {
       name: "Soporte Sistema de Inventario",
     },
@@ -55,7 +55,6 @@ const configuracionBase = {
       name: "Órdenes de Despacho",
       description: "Órdenes para despachar productos",
     },
-    { name: "Máquinas", description: "Gestión de maquinaria" },
     { name: "Inventario", description: "Vista de stock por sede y global" },
     {
       name: "Fichas de Producción",

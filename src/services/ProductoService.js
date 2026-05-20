@@ -11,10 +11,12 @@ class ProductoService {
       ProductoRepository.model,
       "codigoInterno",
     );
+    const codigoExterno = String(datos.codigoExterno || "").trim();
 
     const producto = await ProductoRepository.create({
       codigoInterno,
-      codigoExterno: datos.codigoExterno || "",
+      referencia: codigoExterno || codigoInterno,
+      codigoExterno,
       nombre: datos.nombre,
       descripcion: datos.descripcion || "",
       categoriaId: datos.categoriaId,
@@ -57,6 +59,12 @@ class ProductoService {
     const producto = await ProductoRepository.findById(id);
     if (!producto || !producto.activo)
       throw new ErrorApi(404, "Producto no encontrado");
+
+    if (Object.prototype.hasOwnProperty.call(datos, "codigoExterno")) {
+      const codigoExterno = String(datos.codigoExterno || "").trim();
+      datos.codigoExterno = codigoExterno;
+      datos.referencia = codigoExterno || producto.codigoInterno;
+    }
 
     delete datos.activo;
     delete datos.codigoInterno; // No permitir cambiar código interno

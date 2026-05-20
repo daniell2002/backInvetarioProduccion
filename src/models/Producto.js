@@ -78,6 +78,12 @@ const productoSchema = new mongoose.Schema(
       trim: true,
       uppercase: true,
     },
+    referencia: {
+      type: String,
+      unique: true,
+      trim: true,
+      uppercase: true,
+    },
     codigoExterno: {
       type: String,
       trim: true,
@@ -135,6 +141,7 @@ const productoSchema = new mongoose.Schema(
 
 productoSchema.index({ nombre: 1 });
 productoSchema.index({ categoriaId: 1 });
+productoSchema.index({ referencia: 1 });
 productoSchema.index({ codigoExterno: 1 });
 
 const Producto = mongoose.model("Producto", productoSchema);
