@@ -26,8 +26,6 @@ export const MODULOS = Object.freeze({
   AJUSTES_INVENTARIO: "ajustes_inventario",
   ORDENES_DESPACHO: "ordenes_despacho",
   INVENTARIO: "inventario",
-  FICHAS_PRODUCCION: "fichas_produccion",
-  PRODUCCION: "produccion",
 });
 
 /**

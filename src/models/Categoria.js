@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { trazabilidadSchema } from "../utils/trazabilidad.util.js";
+const { Schema } = mongoose;
 
 const subcategoriaSchema = new mongoose.Schema(
   {
@@ -23,6 +24,11 @@ const categoriaSchema = new mongoose.Schema(
       type: String,
       trim: true,
       maxlength: 200,
+    },
+    grupoId: {
+      type: Schema.Types.ObjectId,
+      ref: "Grupo",
+      default: null,
     },
     subcategorias: [subcategoriaSchema],
     activo: {

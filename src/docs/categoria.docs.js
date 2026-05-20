@@ -9,6 +9,7 @@ const schemaCrearCategoria = {
     properties: {
       nombre: { type: "string", minLength: 2, maxLength: 100 },
       descripcion: { type: "string", maxLength: 200 },
+      grupoId: { type: "string", nullable: true },
     },
     additionalProperties: false,
   },
@@ -182,6 +183,7 @@ const schemaActualizarCategoria = {
     properties: {
       nombre: { type: "string", minLength: 2, maxLength: 100 },
       descripcion: { type: "string", maxLength: 200 },
+      grupoId: { type: "string", nullable: true },
     },
     additionalProperties: false,
   },
