@@ -5,7 +5,7 @@ const schemaCrearProducto = {
   security: [{ bearerAuth: [] }],
   body: {
     type: "object",
-    required: ["nombre", "categoriaId"],
+    required: ["nombre"],
     properties: {
       nombre: { type: "string", minLength: 2, maxLength: 150 },
       descripcion: { type: "string", maxLength: 500 },

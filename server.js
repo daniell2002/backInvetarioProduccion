@@ -133,7 +133,7 @@ const iniciar = async () => {
     // 5. JWT
     await aplicacion.register(import("@fastify/jwt"), {
       secret: process.env.JWT_SECRET,
-      sign: { expiresIn: process.env.JWT_EXPIRES_IN || "15m" },
+      sign: { expiresIn: process.env.JWT_EXPIRES_IN || "1h" },
     });
 
     // 6. Documentación OpenAPI + Scalar

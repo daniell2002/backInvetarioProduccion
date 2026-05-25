@@ -1,5 +1,5 @@
 export const configuracionLimitadorAuth = {
-  max: 5,
+  max: 15,
   timeWindow: "15 minutes",
   errorResponseBuilder: () => ({
     statusCode: 429,

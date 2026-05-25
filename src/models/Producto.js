@@ -103,7 +103,7 @@ const productoSchema = new mongoose.Schema(
     categoriaId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Categoria",
-      required: true,
+      default: null,
     },
     subcategoriaId: {
       type: mongoose.Schema.Types.ObjectId,
