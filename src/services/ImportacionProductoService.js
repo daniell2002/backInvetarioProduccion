@@ -39,19 +39,21 @@ const MAPA_COLUMNAS = {
     "codigo_ref",
     "cod_referencia",
   ],
-  // "Descripcion Grupo" del Excel → categoría principal
+  // "Grupo" del Excel → categoría principal
   categoria: [
-    "descripcion_grupo",
-    "desc_grupo",
+    "grupo",
+    "grupo_numero",
+    "grupo_no",
     "categoria",
     "categorias",
     "familia",
     "linea",
     "tipo",
   ],
-  // "Grupo" del Excel → subcategoría dentro de esa categoría
+  // "Descripcion Grupo" del Excel → subcategoría dentro de esa categoría
   subcategoria: [
-    "grupo",
+    "descripcion_grupo",
+    "desc_grupo",
     "subgrupo",
     "subcategoria",
     "sub_categoria",
@@ -115,7 +117,11 @@ const contarCoincidencias = (valores) => {
  * Convierte todas las celdas de una fila ExcelJS a valores planos (string/number/null).
  */
 const extraerValoresFila = (fila) =>
-  fila.values.slice(1).map((v) => {
+  fila.values.slice(1).map((v, idx) => {
+    const celda = fila.getCell(idx + 1);
+    const textoFormateado = String(celda?.text ?? "").trim();
+    if (textoFormateado) return textoFormateado;
+
     if (v === null || v === undefined) return null;
     if (typeof v === "object" && v.text !== undefined)
       return String(v.text).trim(); // RichText
@@ -167,7 +173,7 @@ const leerFilasDesdeBuffer = async (buffer, nombreArchivo) => {
   if (maxCoincidencias === 0) {
     throw new Error(
       "No se encontró ninguna fila de encabezados reconocible. " +
-        "Verifique que el archivo tenga columnas como: nombre, grupo, unidad medida, valor unidad, cant exist. real, etc.",
+        "Verifique que el archivo tenga columnas como: nombre, grupo, descripcion grupo, unidad medida, valor unidad, cant exist. real, etc.",
     );
   }
 
@@ -321,7 +327,7 @@ const procesarFila = async (fila, mapaColumnas, sedeId, numeroFila, sesion) => {
     };
   }
 
-  // Categoría (de "Descripcion Grupo") y subcategoría (de "Grupo")
+  // Categoría (de "Grupo") y subcategoría (de "Descripcion Grupo")
   const nombreCategoria = leer("categoria");
   const nombreSubcategoria = leer("subcategoria");
   const categoria = await buscarOCrearCategoria(nombreCategoria);

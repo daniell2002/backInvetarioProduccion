@@ -47,6 +47,30 @@ class ImportacionProductoController {
       throw new ErrorApi("El campo sedeId es obligatorio", 400);
     }
 
+    const esAdminGeneral = Boolean(request.usuario?.esAdmin);
+    const sedeUsuario =
+      typeof request.usuario?.sedeId === "object"
+        ? request.usuario?.sedeId?._id
+        : request.usuario?.sedeId;
+
+    if (!esAdminGeneral) {
+      if (!sedeUsuario) {
+        throw new ErrorApi(
+          "Tu usuario no tiene sede asignada para importar inventario",
+          403,
+        );
+      }
+
+      if (sedeId && String(sedeId) !== String(sedeUsuario)) {
+        throw new ErrorApi(
+          "Solo puedes importar inventario en tu propia sede",
+          403,
+        );
+      }
+
+      sedeId = String(sedeUsuario);
+    }
+
     const resultado = await ImportacionProductoService.importarDesdeArchivo({
       buffer,
       nombreArchivo,

@@ -1,7 +1,8 @@
 import ImportacionProductoController from "../controllers/ImportacionProductoController.js";
 import { autenticar } from "../hooks/auth.hook.js";
-import { soloAdmin } from "../hooks/permisos.hook.js";
+import { verificarPermiso } from "../hooks/permisos.hook.js";
 import { schemaImportarProductos } from "../docs/importacionProducto.docs.js";
+import { ACCIONES, MODULOS } from "../utils/permisos.util.js";
 
 async function importacionProductoRoutes(fastify) {
   fastify.addHook("onRequest", autenticar);
@@ -11,7 +12,7 @@ async function importacionProductoRoutes(fastify) {
     {
       attachValidation: true,
       schema: schemaImportarProductos,
-      preHandler: soloAdmin,
+      preHandler: verificarPermiso(MODULOS.PRODUCTOS, ACCIONES.CREAR),
     },
     (req, reply) => ImportacionProductoController.importar(req, reply),
   );

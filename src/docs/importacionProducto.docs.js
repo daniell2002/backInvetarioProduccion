@@ -5,6 +5,7 @@ const schemaImportarProductos = {
     "El archivo debe tener encabezados en la primera fila. Columnas reconocidas (sin distinción de mayúsculas ni acentos):\n\n" +
     "- **nombre / descripcion** — nombre del producto *(obligatorio)*\n" +
     "- **grupo / categoria** — nombre de categoría (se crea si no existe)\n" +
+    "- **descripcion grupo / subcategoria** — nombre de subcategoría dentro de la categoría\n" +
     "- **unidad medida / um / und** — código de unidad de medida *(obligatorio)*\n" +
     "- **codigo externo / referencia** — código externo / referencia\n" +
     "- **valor unidad / valor unitario** — precio unitario\n" +

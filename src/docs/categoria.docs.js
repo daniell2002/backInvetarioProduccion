@@ -83,6 +83,8 @@ const schemaListarCategoriasPaginado = {
       limite: { type: "integer", minimum: 1, maximum: 100, default: 50 },
       nombre: { type: "string" },
       descripcion: { type: "string" },
+      subcategoriaNombre: { type: "string" },
+      busqueda: { type: "string" },
     },
   },
   response: {

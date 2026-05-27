@@ -16,11 +16,13 @@ class CategoriaController {
   }
 
   async listarPaginado(request, reply) {
-    const { pagina = 1, limite = 50, nombre, descripcion } = request.query;
+    const { pagina = 1, limite = 50, nombre, descripcion, subcategoriaNombre, busqueda } = request.query;
 
     const filtros = {};
     if (nombre) filtros.nombre = nombre;
     if (descripcion) filtros.descripcion = descripcion;
+    if (subcategoriaNombre) filtros.subcategoriaNombre = subcategoriaNombre;
+    if (busqueda) filtros.busqueda = busqueda;
 
     const resultado = await CategoriaService.obtenerCategoriasPaginado(
       Number(pagina),
