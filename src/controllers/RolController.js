@@ -13,7 +13,13 @@ class RolController {
   }
 
   async listarPaginado(request, reply) {
-    const { pagina = 1, limite = 50, nombre, descripcion } = request.query;
+    const {
+      pagina = 1,
+      limite = 50,
+      nombre,
+      descripcion,
+      incluirInactivos = false,
+    } = request.query;
 
     const filtros = {};
     if (nombre) filtros.nombre = nombre;
@@ -23,6 +29,7 @@ class RolController {
       Number(pagina),
       Number(limite),
       filtros,
+      incluirInactivos,
     );
 
     return RespuestaApi.exito(reply, "Roles obtenidos", {
@@ -48,6 +55,11 @@ class RolController {
   async eliminar(request, reply) {
     await RolService.eliminarRol(request.params.id, request.usuarioId);
     return RespuestaApi.exito(reply, "Rol eliminado exitosamente");
+  }
+
+  async reactivar(request, reply) {
+    const rol = await RolService.reactivarRol(request.params.id, request.usuarioId);
+    return RespuestaApi.exito(reply, "Rol reactivado exitosamente", { rol });
   }
 }
 
