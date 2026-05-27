@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import ExcelJS from "exceljs";
 import { Readable } from "stream";
 import ProductoRepository from "../repositories/ProductoRepository.js";
@@ -290,7 +291,7 @@ const buscarUnidadPorCodigo = async (codigo) => {
 };
 
 // ─── Procesamiento de una fila ───────────────────────────────
-const procesarFila = async (fila, mapaColumnas, sedeId, numeroFila) => {
+const procesarFila = async (fila, mapaColumnas, sedeId, numeroFila, sesion) => {
   const leer = (campo) => {
     const col = mapaColumnas[campo];
     if (!col) return null;
@@ -344,48 +345,73 @@ const procesarFila = async (fila, mapaColumnas, sedeId, numeroFila) => {
 
   const descripcion = leer("descripcion") || "";
 
-  // Código interno automático
+  // Código interno automático (lectura simple, fuera de la transacción)
   const codigoInterno = await generarCodigo(
     "PRD",
     ProductoRepository.model,
     "codigoInterno",
   );
 
-  const producto = await ProductoRepository.create({
-    codigoInterno,
-    referencia: codigoExterno || codigoInterno,
-    codigoExterno,
-    nombre,
-    descripcion,
-    categoriaId: categoria ? categoria._id : null,
-    subcategoriaId: subcategoria ? subcategoria._id : null,
-    unidadMedidaId: unidad._id,
-    valorUnitario,
-    stockMinimo: 10,
-    stockMaximo: 9999,
-    activo: true,
-  });
+  // ── Transacción por fila: producto + stock son atómicos ──────
+  sesion.startTransaction();
+  try {
+    const producto = await ProductoRepository.create(
+      {
+        codigoInterno,
+        referencia: codigoExterno || codigoInterno,
+        codigoExterno,
+        nombre,
+        descripcion,
+        categoriaId: categoria ? categoria._id : null,
+        subcategoriaId: subcategoria ? subcategoria._id : null,
+        unidadMedidaId: unidad._id,
+        valorUnitario,
+        stockMinimo: 10,
+        stockMaximo: 9999,
+        activo: true,
+      },
+      { session: sesion },
+    );
 
-  // Stock inicial en la sede (siempre crear el registro aunque sea 0)
-  if (sedeId) {
-    await StockRepository.incrementarStock(producto._id, sedeId, stockInicial);
+    if (sedeId) {
+      await StockRepository.incrementarStock(
+        producto._id,
+        sedeId,
+        stockInicial,
+        { session: sesion },
+      );
+    }
+
+    await sesion.commitTransaction();
+
+    return {
+      fila: numeroFila,
+      estado: "exitoso",
+      motivo: null,
+      datos: {
+        productoId: producto._id,
+        codigoInterno: producto.codigoInterno,
+        nombre: producto.nombre,
+        categoria: categoria ? categoria.nombre : null,
+        subcategoria: subcategoria ? subcategoria.nombre : null,
+        unidadMedida: unidad.nombre,
+        valorUnitario: producto.valorUnitario,
+        stockInicial,
+      },
+    };
+  } catch (errTx) {
+    await sesion.abortTransaction();
+    logger.error(
+      { fila: numeroFila, err: errTx.message },
+      "Importación: rollback de fila",
+    );
+    return {
+      fila: numeroFila,
+      estado: "error",
+      motivo: errTx.message,
+      datos: null,
+    };
   }
-
-  return {
-    fila: numeroFila,
-    estado: "exitoso",
-    motivo: null,
-    datos: {
-      productoId: producto._id,
-      codigoInterno: producto.codigoInterno,
-      nombre: producto.nombre,
-      categoria: categoria ? categoria.nombre : null,
-      subcategoria: subcategoria ? subcategoria.nombre : null,
-      unidadMedida: unidad.nombre,
-      valorUnitario: producto.valorUnitario,
-      stockInicial,
-    },
-  };
 };
 
 // ─── Servicio principal ──────────────────────────────────────
@@ -425,15 +451,21 @@ class ImportacionProductoService {
 
     const mapaColumnas = mapearEncabezados(encabezados);
 
+    const sesion = await mongoose.startSession();
     const resultados = [];
-    for (let i = 0; i < filas.length; i++) {
-      const resultado = await procesarFila(
-        filas[i],
-        mapaColumnas,
-        sedeId,
-        i + 2, // +2 porque fila 1 = encabezados
-      );
-      resultados.push(resultado);
+    try {
+      for (let i = 0; i < filas.length; i++) {
+        const resultado = await procesarFila(
+          filas[i],
+          mapaColumnas,
+          sedeId,
+          i + 2, // +2 porque fila 1 = encabezados
+          sesion,
+        );
+        resultados.push(resultado);
+      }
+    } finally {
+      sesion.endSession();
     }
 
     const exitosos = resultados.filter((r) => r.estado === "exitoso").length;
