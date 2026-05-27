@@ -4,6 +4,7 @@ import rolRoutes from "./rol.routes.js";
 import sedeRoutes from "./sede.routes.js";
 import categoriaRoutes from "./categoria.routes.js";
 import grupoRoutes from "./grupo.routes.js";
+import unidadMedidaRoutes from "./unidadMedida.routes.js";
 import productoRoutes from "./producto.routes.js";
 import terceroRoutes from "./tercero.routes.js";
 import ordenCompraRoutes from "./ordenCompra.routes.js";
@@ -13,6 +14,7 @@ import trasladoRoutes from "./traslado.routes.js";
 import ajusteInventarioRoutes from "./ajusteInventario.routes.js";
 import ordenDespachoRoutes from "./ordenDespacho.routes.js";
 import inventarioRoutes from "./inventario.routes.js";
+import importacionRoutes from "./importacion.routes.js";
 
 const rutasPrincipales = async (fastify, opciones) => {
   // ─── Rutas sin autenticación ─────────────────────────────
@@ -24,6 +26,7 @@ const rutasPrincipales = async (fastify, opciones) => {
   await fastify.register(sedeRoutes, { prefix: "/v1/sedes" });
   await fastify.register(categoriaRoutes, { prefix: "/v1/categorias" });
   await fastify.register(grupoRoutes, { prefix: "/v1/grupos" });
+  await fastify.register(unidadMedidaRoutes, { prefix: "/v1/unidades-medida" });
   await fastify.register(productoRoutes, { prefix: "/v1/productos" });
   await fastify.register(terceroRoutes, { prefix: "/v1/terceros" });
   await fastify.register(ordenCompraRoutes, { prefix: "/v1/ordenes-compra" });
@@ -37,6 +40,7 @@ const rutasPrincipales = async (fastify, opciones) => {
     prefix: "/v1/ordenes-despacho",
   });
   await fastify.register(inventarioRoutes, { prefix: "/v1/inventario" });
+  await fastify.register(importacionRoutes, { prefix: "/v1/importacion" });
 
   // Ruta de health check
   fastify.get("/health", async () => ({

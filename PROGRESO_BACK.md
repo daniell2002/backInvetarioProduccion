@@ -1,6 +1,6 @@
 # 📊 Progreso Backend — Sistema de Inventario Industrial
 
-> Última actualización: 19 de abril de 2026
+> Última actualización: 26 de mayo de 2026
 
 ---
 
@@ -8,9 +8,9 @@
 
 | Métrica                 | Valor     |
 | ----------------------- | --------- |
-| Módulos completados     | 17 / 17   |
-| Endpoints implementados | ~89       |
-| Modelos creados         | 16        |
+| Módulos completados     | 16 / 16   |
+| Endpoints implementados | ~92       |
+| Modelos creados         | 15        |
 | Tests                   | Pendiente |
 
 ---
@@ -71,7 +71,14 @@
 ### 6. Productos ✅
 
 - Modelo con presentaciones embebidas, código auto (PRD-00001), código externo opcional
+- Campo `unidadMedidaId` en presentaciones referencia obligatoria a `UnidadMedida`
 - 5 rutas con permisos por módulo
+
+### 6b. Unidades de Medida ✅
+
+- Modelo `UnidadMedida` con `codigo` y `nombre` (fuente: `unidadesMedidas.json`)
+- Solo lectura desde BD; datos cargados vía sincronización desde archivo estático
+- 3 rutas: `POST /sincronizar` (solo admin), `GET /`, `GET /:id`
 
 ### 7. Terceros ✅
 
@@ -124,26 +131,13 @@
 - Modelo Stock {productoId, sedeId} con índice compuesto único
 - 3 rutas: stock por sede, stock global (aggregation), stock por producto
 
-### 16. Fichas de Producción ✅
+### 16. Fichas de Producción ❌ Eliminado
 
-- Modelo FichaProduccion con materiales embebidos (receta / BOM)
-- Flujo: pendiente → aprobada → obsoleta
-- 9 rutas: CRUD + aprobar + obsoletar + fichas aprobadas por producto + paginado
-- Solo fichas aprobadas pueden usarse en producciones
-- Código auto: FPR-00001
+- Módulo removido del sistema (no se utilizará)
 
-### 17. Producción ✅
+### 17. Producción ❌ Eliminado
 
-- Modelo Produccion con materiales, lotes de costo y equivalencias
-- Flujo: borrador → en_proceso → completada | anulada
-- 9 rutas: crear, listar, paginado, obtener, iniciar, completar, anular, proyectar, estimar-costo
-- Completar genera salida (materiales) + entrada (producto fabricado) en transacción
-- Anular revierte movimientos si estaba completada
-- Cálculo de costos por promedio ponderado de entradas (maneja precios mixtos de proveedores)
-- Equivalencias de presentaciones (rollos→metros, cajas→unidades, etc.)
-- Proyección: cuánto puedo fabricar con el stock actual + cuello de botella
-- Estimación de costo previo a producir
-- Código auto: PROD-00001
+- Módulo removido del sistema (no se utilizará)
 
 ---
 

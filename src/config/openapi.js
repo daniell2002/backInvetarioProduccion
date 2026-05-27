@@ -12,7 +12,11 @@ const configuracionBase = {
     },
   },
   servers: [
-    { url: "http://localhost:3080", description: "Servidor de desarrollo" },
+    { url: "http://localhost:3080/api", description: "Desarrollo — localhost" },
+    {
+      url: "http://192.168.0.104:3080/api",
+      description: "Desarrollo — red local",
+    },
   ],
   components: {
     securitySchemes: {
@@ -36,6 +40,11 @@ const configuracionBase = {
       description: "Gestión de categorías y subcategorías",
     },
     {
+      name: "Unidades de Medida",
+      description:
+        "Unidades de medida de productos — cargadas desde archivo estático",
+    },
+    {
       name: "Productos",
       description: "Gestión de productos e inventario base",
     },
@@ -57,14 +66,9 @@ const configuracionBase = {
     },
     { name: "Inventario", description: "Vista de stock por sede y global" },
     {
-      name: "Fichas de Producción",
+      name: "Importación Productos",
       description:
-        "Recetas / BOM que definen materiales para producir un producto",
-    },
-    {
-      name: "Producción",
-      description:
-        "Órdenes de producción — transformación de materia prima en producto terminado",
+        "Importación masiva de productos desde archivo Excel (.xlsx) o CSV",
     },
   ],
   paths: {},

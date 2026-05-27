@@ -21,7 +21,7 @@ class ProductoService {
       descripcion: datos.descripcion || "",
       categoriaId: datos.categoriaId,
       subcategoriaId: datos.subcategoriaId || null,
-      presentaciones: datos.presentaciones || [],
+      unidadMedidaId: datos.unidadMedidaId,
       stockMinimo: datos.stockMinimo || 0,
       stockMaximo: datos.stockMaximo || 0,
       imagen: datos.imagen || "",
