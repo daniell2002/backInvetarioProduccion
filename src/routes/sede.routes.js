@@ -12,11 +12,8 @@ import {
 
 async function sedeRoutes(fastify) {
   fastify.addHook("onRequest", autenticar);
-  fastify.addHook("onRequest", soloAdmin);
 
-  fastify.post("/", { schema: schemaCrearSede }, (req, reply) =>
-    SedeController.crear(req, reply),
-  );
+  // Lectura: cualquier usuario autenticado puede listar sedes
   fastify.get("/", { schema: schemaListarSedes }, (req, reply) =>
     SedeController.listar(req, reply),
   );
@@ -28,10 +25,15 @@ async function sedeRoutes(fastify) {
   fastify.get("/:id", { schema: schemaObtenerSede }, (req, reply) =>
     SedeController.obtenerPorId(req, reply),
   );
-  fastify.put("/:id", { schema: schemaActualizarSede }, (req, reply) =>
+
+  // Escritura: solo administradores
+  fastify.post("/", { schema: schemaCrearSede, preHandler: soloAdmin }, (req, reply) =>
+    SedeController.crear(req, reply),
+  );
+  fastify.put("/:id", { schema: schemaActualizarSede, preHandler: soloAdmin }, (req, reply) =>
     SedeController.actualizar(req, reply),
   );
-  fastify.delete("/:id", { schema: schemaEliminarSede }, (req, reply) =>
+  fastify.delete("/:id", { schema: schemaEliminarSede, preHandler: soloAdmin }, (req, reply) =>
     SedeController.eliminar(req, reply),
   );
 }

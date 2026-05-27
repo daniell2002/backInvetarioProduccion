@@ -78,7 +78,7 @@ const schemaListarProductosPaginado = {
     type: "object",
     properties: {
       pagina: { type: "integer", minimum: 1, default: 1 },
-      limite: { type: "integer", minimum: 1, maximum: 100, default: 20 },
+      limite: { type: "integer", minimum: 1, maximum: 10000, default: 20 },
       nombre: { type: "string" },
       categoriaId: { type: "string" },
       subcategoriaId: { type: "string" },
