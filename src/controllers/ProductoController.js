@@ -2,6 +2,13 @@ import ProductoService from "../services/ProductoService.js";
 import RespuestaApi from "../utils/RespuestaApi.js";
 
 class ProductoController {
+  resolverBoolean(valor, porDefecto = false) {
+    if (valor === undefined || valor === null) return porDefecto;
+    if (typeof valor === "boolean") return valor;
+    if (typeof valor === "string") return valor.toLowerCase() === "true";
+    return porDefecto;
+  }
+
   async crear(request, reply) {
     const producto = await ProductoService.crearProducto(
       request.body,
@@ -11,7 +18,11 @@ class ProductoController {
   }
 
   async listar(request, reply) {
-    const productos = await ProductoService.obtenerProductos();
+    const incluirInactivos = this.resolverBoolean(
+      request.query?.incluirInactivos,
+      false,
+    );
+    const productos = await ProductoService.obtenerProductos({}, incluirInactivos);
     return RespuestaApi.exito(reply, "Productos obtenidos", { productos });
   }
 
@@ -24,6 +35,7 @@ class ProductoController {
       subcategoriaId,
       codigoInterno,
       codigoExterno,
+      incluirInactivos,
     } = request.query;
     const filtros = {};
     if (nombre) filtros.nombre = nombre;
@@ -31,6 +43,7 @@ class ProductoController {
     if (subcategoriaId) filtros.subcategoriaId = subcategoriaId;
     if (codigoInterno) filtros.codigoInterno = codigoInterno;
     if (codigoExterno) filtros.codigoExterno = codigoExterno;
+    filtros.incluirInactivos = this.resolverBoolean(incluirInactivos, false);
 
     const resultado = await ProductoService.obtenerProductosPaginado(
       Number(pagina),
@@ -65,6 +78,25 @@ class ProductoController {
       request.usuarioId,
     );
     return RespuestaApi.exito(reply, "Producto eliminado");
+  }
+
+  async actualizarEstado(request, reply) {
+    const producto = await ProductoService.actualizarEstadoProducto(
+      request.params.id,
+      request.body?.activo,
+      request.usuarioId,
+    );
+    return RespuestaApi.exito(reply, "Estado de producto actualizado", {
+      producto,
+    });
+  }
+
+  async eliminarFisico(request, reply) {
+    await ProductoService.eliminarProductoFisico(
+      request.params.id,
+      request.usuarioId,
+    );
+    return RespuestaApi.exito(reply, "Producto eliminado permanentemente");
   }
 }
 

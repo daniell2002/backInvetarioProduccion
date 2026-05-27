@@ -23,13 +23,21 @@ class TerceroService {
     return tercero;
   }
 
-  async obtenerTerceros(filtros = {}) {
-    return await TerceroRepository.findAll({ ...filtros, activo: true });
+  async obtenerTerceros(filtros = {}, incluirInactivos = false) {
+    return await TerceroRepository.findAll(
+      incluirInactivos ? { ...filtros } : { ...filtros, activo: true },
+    );
   }
 
   async obtenerTercerosPaginado(pagina, limite, filtros = {}) {
+    const filtroConsulta = { ...filtros };
+    if (!filtros.incluirInactivos) {
+      filtroConsulta.activo = true;
+    }
+    delete filtroConsulta.incluirInactivos;
+
     return await TerceroRepository.findPaginado(
-      { ...filtros, activo: true },
+      filtroConsulta,
       pagina,
       limite,
     );
@@ -91,6 +99,45 @@ class TerceroService {
       },
     });
     logAccionUsuario(usuarioId, "ELIMINAR_TERCERO", { terceroEliminado: id });
+  }
+
+  async actualizarEstadoTercero(id, activo, usuarioId) {
+    const tercero = await TerceroRepository.findById(id);
+    if (!tercero) throw new ErrorApi(404, "Tercero no encontrado");
+
+    const nuevoEstado = Boolean(activo);
+    if (Boolean(tercero.activo) === nuevoEstado) {
+      return tercero;
+    }
+
+    const actualizado = await TerceroRepository.updateById(id, {
+      $set: { activo: nuevoEstado },
+      $push: {
+        trazabilidad: crearTrazabilidad(
+          usuarioId,
+          "actualizacion",
+          nuevoEstado ? "Tercero reactivado" : "Tercero desactivado",
+        ),
+      },
+    });
+
+    logAccionUsuario(
+      usuarioId,
+      nuevoEstado ? "REACTIVAR_TERCERO" : "DESACTIVAR_TERCERO",
+      { terceroActualizado: id, activo: nuevoEstado },
+    );
+
+    return actualizado;
+  }
+
+  async eliminarTerceroFisico(id, usuarioId) {
+    const tercero = await TerceroRepository.findById(id);
+    if (!tercero) throw new ErrorApi(404, "Tercero no encontrado");
+
+    await TerceroRepository.deleteById(id);
+    logAccionUsuario(usuarioId, "ELIMINAR_TERCERO_FISICO", {
+      terceroEliminado: id,
+    });
   }
 }
 

@@ -27,9 +27,26 @@ class UsuarioRepository extends BaseRepository {
       .sort({ nombre: 1 });
   }
 
+  async findAll(filtros = {}) {
+    const consulta = this.construirFiltros(filtros);
+    if (filtros.activo !== undefined) {
+      consulta.activo = filtros.activo;
+    }
+
+    return await this.model
+      .find(consulta)
+      .select("-passwordHash")
+      .populate("rolId", "nombre")
+      .populate("sedeId", "nombre")
+      .sort({ nombre: 1 });
+  }
+
   async findAllPaginado(pagina = 1, limite = 50, filtros = {}) {
     const saltar = (pagina - 1) * limite;
-    const consulta = { activo: true, ...this.construirFiltros(filtros) };
+    const consulta = this.construirFiltros(filtros);
+    if (filtros.activo !== undefined) {
+      consulta.activo = filtros.activo;
+    }
 
     const [usuarios, total] = await Promise.all([
       this.model
@@ -77,6 +94,9 @@ class UsuarioRepository extends BaseRepository {
     }
     if (filtros.sedeId) {
       consulta.sedeId = filtros.sedeId;
+    }
+    if (filtros.esAdmin !== undefined) {
+      consulta.esAdmin = filtros.esAdmin;
     }
     return consulta;
   }

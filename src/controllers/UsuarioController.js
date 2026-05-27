@@ -2,6 +2,13 @@ import UsuarioService from "../services/UsuarioService.js";
 import RespuestaApi from "../utils/RespuestaApi.js";
 
 class UsuarioController {
+  resolverBoolean(valor, porDefecto = false) {
+    if (valor === undefined || valor === null) return porDefecto;
+    if (typeof valor === "boolean") return valor;
+    if (typeof valor === "string") return valor.toLowerCase() === "true";
+    return porDefecto;
+  }
+
   async crear(request, reply) {
     const resultado = await UsuarioService.crearUsuario(
       request.body,
@@ -16,7 +23,11 @@ class UsuarioController {
   }
 
   async listar(request, reply) {
-    const usuarios = await UsuarioService.obtenerUsuarios();
+    const incluirInactivos = this.resolverBoolean(
+      request.query?.incluirInactivos,
+      false,
+    );
+    const usuarios = await UsuarioService.obtenerUsuarios({}, incluirInactivos);
     return RespuestaApi.exito(reply, "Usuarios obtenidos", { usuarios });
   }
 
@@ -29,6 +40,7 @@ class UsuarioController {
       sedeId,
       rolId,
       esAdmin,
+      incluirInactivos,
     } = request.query;
     const filtros = {};
     if (nombre) filtros.nombre = nombre;
@@ -36,6 +48,7 @@ class UsuarioController {
     if (sedeId) filtros.sedeId = sedeId;
     if (rolId) filtros.rolId = rolId;
     if (esAdmin !== undefined) filtros.esAdmin = esAdmin;
+    filtros.incluirInactivos = this.resolverBoolean(incluirInactivos, false);
 
     const resultado = await UsuarioService.obtenerUsuariosPaginado(
       Number(pagina),
@@ -65,6 +78,25 @@ class UsuarioController {
   async eliminar(request, reply) {
     await UsuarioService.eliminarUsuario(request.params.id, request.usuarioId);
     return RespuestaApi.exito(reply, "Usuario desactivado exitosamente");
+  }
+
+  async actualizarEstado(request, reply) {
+    const usuario = await UsuarioService.actualizarEstadoUsuario(
+      request.params.id,
+      request.body?.activo,
+      request.usuarioId,
+    );
+    return RespuestaApi.exito(reply, "Estado de usuario actualizado", {
+      usuario,
+    });
+  }
+
+  async eliminarFisico(request, reply) {
+    await UsuarioService.eliminarUsuarioFisico(
+      request.params.id,
+      request.usuarioId,
+    );
+    return RespuestaApi.exito(reply, "Usuario eliminado permanentemente");
   }
 }
 

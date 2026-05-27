@@ -28,9 +28,15 @@ const schemaCrearProducto = {
 
 const schemaListarProductos = {
   summary: "Listar productos",
-  description: "Listar productos activos",
+  description: "Listar productos (activos por defecto)",
   tags: ["Productos"],
   security: [{ bearerAuth: [] }],
+  querystring: {
+    type: "object",
+    properties: {
+      incluirInactivos: { type: "boolean", default: false },
+    },
+  },
   response: {
     200: {
       description: "Productos obtenidos",
@@ -84,6 +90,7 @@ const schemaListarProductosPaginado = {
       subcategoriaId: { type: "string" },
       codigoInterno: { type: "string" },
       codigoExterno: { type: "string" },
+      incluirInactivos: { type: "boolean", default: false },
     },
   },
   response: {
@@ -193,7 +200,7 @@ const schemaActualizarProducto = {
 };
 
 const schemaEliminarProducto = {
-  summary: "Eliminar producto",
+  summary: "Desactivar producto",
   description: "Eliminar producto (soft delete)",
   tags: ["Productos"],
   security: [{ bearerAuth: [] }],
@@ -204,6 +211,46 @@ const schemaEliminarProducto = {
   },
   response: {
     200: { description: "Producto desactivado" },
+    404: { description: "Producto no encontrado" },
+  },
+};
+
+const schemaActualizarEstadoProducto = {
+  summary: "Actualizar estado de producto",
+  description: "Activar o desactivar producto",
+  tags: ["Productos"],
+  security: [{ bearerAuth: [] }],
+  params: {
+    type: "object",
+    properties: { id: { type: "string" } },
+    required: ["id"],
+  },
+  body: {
+    type: "object",
+    required: ["activo"],
+    properties: {
+      activo: { type: "boolean" },
+    },
+    additionalProperties: false,
+  },
+  response: {
+    200: { description: "Estado actualizado" },
+    404: { description: "Producto no encontrado" },
+  },
+};
+
+const schemaEliminarProductoFisico = {
+  summary: "Eliminar producto permanentemente",
+  description: "Eliminar producto de forma física",
+  tags: ["Productos"],
+  security: [{ bearerAuth: [] }],
+  params: {
+    type: "object",
+    properties: { id: { type: "string" } },
+    required: ["id"],
+  },
+  response: {
+    200: { description: "Producto eliminado permanentemente" },
     404: { description: "Producto no encontrado" },
   },
 };
@@ -219,5 +266,7 @@ export {
   schemaObtenerProducto,
   schemaActualizarProducto,
   schemaEliminarProducto,
+  schemaActualizarEstadoProducto,
+  schemaEliminarProductoFisico,
   productoTags,
 };

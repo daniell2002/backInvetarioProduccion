@@ -25,12 +25,16 @@ class SedeService {
     return sede;
   }
 
-  async obtenerSedes() {
-    return await SedeRepository.findAllActivas();
+  async obtenerSedes(incluirInactivas = false) {
+    return await SedeRepository.findAll(incluirInactivas ? {} : { activo: true });
   }
 
   async obtenerSedesPaginado(pagina, limite, filtros = {}) {
-    const filtroConsulta = { activo: true };
+    const filtroConsulta = {};
+
+    if (!filtros.incluirInactivas) {
+      filtroConsulta.activo = true;
+    }
 
     if (filtros.nombre) {
       filtroConsulta.nombre = { $regex: filtros.nombre, $options: "i" };
@@ -95,6 +99,42 @@ class SedeService {
       },
     });
     logAccionUsuario(adminId, "ELIMINAR_SEDE", { sedeEliminada: id });
+  }
+
+  async actualizarEstadoSede(id, activo, adminId) {
+    const sede = await SedeRepository.findById(id);
+    if (!sede) throw new ErrorApi(404, "Sede no encontrada");
+
+    const nuevoEstado = Boolean(activo);
+    if (Boolean(sede.activo) === nuevoEstado) {
+      return sede;
+    }
+
+    const actualizada = await SedeRepository.updateById(id, {
+      $set: { activo: nuevoEstado },
+      $push: {
+        trazabilidad: crearTrazabilidad(
+          adminId,
+          "actualizacion",
+          nuevoEstado ? "Sede reactivada" : "Sede desactivada",
+        ),
+      },
+    });
+
+    logAccionUsuario(adminId, nuevoEstado ? "REACTIVAR_SEDE" : "DESACTIVAR_SEDE", {
+      sedeActualizada: id,
+      activo: nuevoEstado,
+    });
+
+    return actualizada;
+  }
+
+  async eliminarSedeFisica(id, adminId) {
+    const sede = await SedeRepository.findById(id);
+    if (!sede) throw new ErrorApi(404, "Sede no encontrada");
+
+    await SedeRepository.deleteById(id);
+    logAccionUsuario(adminId, "ELIMINAR_SEDE_FISICA", { sedeEliminada: id });
   }
 }
 

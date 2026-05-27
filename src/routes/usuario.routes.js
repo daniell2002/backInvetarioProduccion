@@ -8,6 +8,8 @@ import {
   schemaObtenerUsuario,
   schemaActualizarUsuario,
   schemaEliminarUsuario,
+  schemaActualizarEstadoUsuario,
+  schemaEliminarUsuarioFisico,
 } from "../docs/usuario.docs.js";
 
 async function usuarioRoutes(fastify) {
@@ -34,6 +36,16 @@ async function usuarioRoutes(fastify) {
   );
   fastify.delete("/:id", { schema: schemaEliminarUsuario }, (req, reply) =>
     UsuarioController.eliminar(req, reply),
+  );
+  fastify.patch(
+    "/:id/estado",
+    { schema: schemaActualizarEstadoUsuario },
+    (req, reply) => UsuarioController.actualizarEstado(req, reply),
+  );
+  fastify.delete(
+    "/:id/fisico",
+    { schema: schemaEliminarUsuarioFisico },
+    (req, reply) => UsuarioController.eliminarFisico(req, reply),
   );
 }
 

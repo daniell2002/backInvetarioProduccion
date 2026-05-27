@@ -6,6 +6,7 @@ export const ACCIONES = Object.freeze({
   VER: "ver",
   CREAR: "crear",
   ACTUALIZAR: "actualizar",
+  ESTADO: "estado",
   ELIMINAR: "eliminar",
 });
 
@@ -28,13 +29,91 @@ export const MODULOS = Object.freeze({
   INVENTARIO: "inventario",
 });
 
+export const ACCIONES_POR_MODULO = Object.freeze({
+  [MODULOS.USUARIOS]: [
+    ACCIONES.VER,
+    ACCIONES.CREAR,
+    ACCIONES.ACTUALIZAR,
+    ACCIONES.ESTADO,
+    ACCIONES.ELIMINAR,
+  ],
+  [MODULOS.ROLES]: [
+    ACCIONES.VER,
+    ACCIONES.CREAR,
+    ACCIONES.ACTUALIZAR,
+    ACCIONES.ELIMINAR,
+  ],
+  [MODULOS.SEDES]: [
+    ACCIONES.VER,
+    ACCIONES.CREAR,
+    ACCIONES.ACTUALIZAR,
+    ACCIONES.ESTADO,
+    ACCIONES.ELIMINAR,
+  ],
+  [MODULOS.CATEGORIAS]: [
+    ACCIONES.VER,
+    ACCIONES.CREAR,
+    ACCIONES.ACTUALIZAR,
+    ACCIONES.ELIMINAR,
+  ],
+  [MODULOS.PRODUCTOS]: [
+    ACCIONES.VER,
+    ACCIONES.CREAR,
+    ACCIONES.ACTUALIZAR,
+    ACCIONES.ESTADO,
+    ACCIONES.ELIMINAR,
+  ],
+  [MODULOS.TERCEROS]: [
+    ACCIONES.VER,
+    ACCIONES.CREAR,
+    ACCIONES.ACTUALIZAR,
+    ACCIONES.ESTADO,
+    ACCIONES.ELIMINAR,
+  ],
+  [MODULOS.ORDENES_COMPRA]: [
+    ACCIONES.VER,
+    ACCIONES.CREAR,
+    ACCIONES.ACTUALIZAR,
+    ACCIONES.ELIMINAR,
+  ],
+  [MODULOS.ENTRADAS]: [
+    ACCIONES.VER,
+    ACCIONES.CREAR,
+    ACCIONES.ACTUALIZAR,
+  ],
+  [MODULOS.SALIDAS]: [
+    ACCIONES.VER,
+    ACCIONES.CREAR,
+    ACCIONES.ACTUALIZAR,
+  ],
+  [MODULOS.TRASLADOS]: [
+    ACCIONES.VER,
+    ACCIONES.CREAR,
+    ACCIONES.ACTUALIZAR,
+  ],
+  [MODULOS.AJUSTES_INVENTARIO]: [
+    ACCIONES.VER,
+    ACCIONES.CREAR,
+  ],
+  [MODULOS.ORDENES_DESPACHO]: [
+    ACCIONES.VER,
+    ACCIONES.CREAR,
+    ACCIONES.ACTUALIZAR,
+    ACCIONES.ELIMINAR,
+  ],
+  [MODULOS.INVENTARIO]: [ACCIONES.VER, ACCIONES.ACTUALIZAR],
+});
+
+export const obtenerAccionesPermitidasModulo = (modulo) =>
+  ACCIONES_POR_MODULO[modulo] || [];
+
 /**
  * Genera la lista completa de permisos posibles (todas las combinaciones módulo + acción).
  */
 export const generarTodosLosPermisos = () => {
   const permisos = [];
   for (const modulo of Object.values(MODULOS)) {
-    for (const accion of Object.values(ACCIONES)) {
+    for (const accion of obtenerAccionesPermitidasModulo(modulo)) {
       permisos.push({ modulo, accion });
     }
   }

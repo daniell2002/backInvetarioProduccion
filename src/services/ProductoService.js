@@ -36,13 +36,21 @@ class ProductoService {
     return producto;
   }
 
-  async obtenerProductos(filtros = {}) {
-    return await ProductoRepository.findAll({ ...filtros, activo: true });
+  async obtenerProductos(filtros = {}, incluirInactivos = false) {
+    return await ProductoRepository.findAll(
+      incluirInactivos ? { ...filtros } : { ...filtros, activo: true },
+    );
   }
 
   async obtenerProductosPaginado(pagina, limite, filtros = {}) {
+    const filtroConsulta = { ...filtros };
+    if (!filtros.incluirInactivos) {
+      filtroConsulta.activo = true;
+    }
+    delete filtroConsulta.incluirInactivos;
+
     return await ProductoRepository.findPaginado(
-      { ...filtros, activo: true },
+      filtroConsulta,
       pagina,
       limite,
     );
@@ -101,6 +109,45 @@ class ProductoService {
       },
     });
     logAccionUsuario(usuarioId, "ELIMINAR_PRODUCTO", { productoEliminado: id });
+  }
+
+  async actualizarEstadoProducto(id, activo, usuarioId) {
+    const producto = await ProductoRepository.findById(id);
+    if (!producto) throw new ErrorApi(404, "Producto no encontrado");
+
+    const nuevoEstado = Boolean(activo);
+    if (Boolean(producto.activo) === nuevoEstado) {
+      return producto;
+    }
+
+    const actualizado = await ProductoRepository.updateById(id, {
+      $set: { activo: nuevoEstado },
+      $push: {
+        trazabilidad: crearTrazabilidad(
+          usuarioId,
+          "actualizacion",
+          nuevoEstado ? "Producto reactivado" : "Producto desactivado",
+        ),
+      },
+    });
+
+    logAccionUsuario(
+      usuarioId,
+      nuevoEstado ? "REACTIVAR_PRODUCTO" : "DESACTIVAR_PRODUCTO",
+      { productoActualizado: id, activo: nuevoEstado },
+    );
+
+    return actualizado;
+  }
+
+  async eliminarProductoFisico(id, usuarioId) {
+    const producto = await ProductoRepository.findById(id);
+    if (!producto) throw new ErrorApi(404, "Producto no encontrado");
+
+    await ProductoRepository.deleteById(id);
+    logAccionUsuario(usuarioId, "ELIMINAR_PRODUCTO_FISICO", {
+      productoEliminado: id,
+    });
   }
 }
 

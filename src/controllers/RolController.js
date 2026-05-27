@@ -2,6 +2,13 @@ import RolService from "../services/RolService.js";
 import RespuestaApi from "../utils/RespuestaApi.js";
 
 class RolController {
+  resolverBoolean(valor, porDefecto = false) {
+    if (valor === undefined || valor === null) return porDefecto;
+    if (typeof valor === "boolean") return valor;
+    if (typeof valor === "string") return valor.toLowerCase() === "true";
+    return porDefecto;
+  }
+
   async crear(request, reply) {
     const rol = await RolService.crearRol(request.body, request.usuarioId);
     return RespuestaApi.exito(reply, "Rol creado exitosamente", { rol }, 201);
@@ -18,7 +25,7 @@ class RolController {
       limite = 50,
       nombre,
       descripcion,
-      incluirInactivos = false,
+      incluirInactivos,
     } = request.query;
 
     const filtros = {};
@@ -29,7 +36,7 @@ class RolController {
       Number(pagina),
       Number(limite),
       filtros,
-      incluirInactivos,
+      this.resolverBoolean(incluirInactivos, false),
     );
 
     return RespuestaApi.exito(reply, "Roles obtenidos", {
@@ -60,6 +67,11 @@ class RolController {
   async reactivar(request, reply) {
     const rol = await RolService.reactivarRol(request.params.id, request.usuarioId);
     return RespuestaApi.exito(reply, "Rol reactivado exitosamente", { rol });
+  }
+
+  async eliminarFisico(request, reply) {
+    await RolService.eliminarRolFisico(request.params.id, request.usuarioId);
+    return RespuestaApi.exito(reply, "Rol eliminado permanentemente");
   }
 }
 

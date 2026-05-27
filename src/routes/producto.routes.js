@@ -8,6 +8,8 @@ import {
   schemaObtenerProducto,
   schemaActualizarProducto,
   schemaEliminarProducto,
+  schemaActualizarEstadoProducto,
+  schemaEliminarProductoFisico,
 } from "../docs/producto.docs.js";
 
 async function productoRoutes(fastify) {
@@ -62,9 +64,27 @@ async function productoRoutes(fastify) {
     "/:id",
     {
       schema: schemaEliminarProducto,
-      preHandler: verificarPermiso("productos", "eliminar"),
+      preHandler: verificarPermiso("productos", "estado"),
     },
     (req, reply) => ProductoController.eliminar(req, reply),
+  );
+
+  fastify.patch(
+    "/:id/estado",
+    {
+      schema: schemaActualizarEstadoProducto,
+      preHandler: verificarPermiso("productos", "estado"),
+    },
+    (req, reply) => ProductoController.actualizarEstado(req, reply),
+  );
+
+  fastify.delete(
+    "/:id/fisico",
+    {
+      schema: schemaEliminarProductoFisico,
+      preHandler: verificarPermiso("productos", "eliminar"),
+    },
+    (req, reply) => ProductoController.eliminarFisico(req, reply),
   );
 }
 

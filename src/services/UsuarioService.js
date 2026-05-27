@@ -62,12 +62,24 @@ class UsuarioService {
     };
   }
 
-  async obtenerUsuarios(filtros = {}) {
-    return await UsuarioRepository.findAllActivos(filtros);
+  async obtenerUsuarios(filtros = {}, incluirInactivos = false) {
+    return await UsuarioRepository.findAll(
+      incluirInactivos ? filtros : { ...filtros, activo: true },
+    );
   }
 
   async obtenerUsuariosPaginado(pagina, limite, filtros = {}) {
-    return await UsuarioRepository.findAllPaginado(pagina, limite, filtros);
+    const filtroConsulta = { ...filtros };
+    if (!filtros.incluirInactivos) {
+      filtroConsulta.activo = true;
+    }
+    delete filtroConsulta.incluirInactivos;
+
+    return await UsuarioRepository.findAllPaginado(
+      pagina,
+      limite,
+      filtroConsulta,
+    );
   }
 
   async obtenerUsuarioPorId(id) {
@@ -132,6 +144,53 @@ class UsuarioService {
       },
     });
     logAccionUsuario(adminId, "ELIMINAR_USUARIO", { usuarioEliminado: id });
+  }
+
+  async actualizarEstadoUsuario(id, activo, adminId) {
+    const usuario = await UsuarioRepository.findById(id);
+    if (!usuario) throw new ErrorApi(404, "Usuario no encontrado");
+
+    if (usuario._id.toString() === adminId && activo === false) {
+      throw new ErrorApi(400, "No puedes desactivar tu propia cuenta");
+    }
+
+    const nuevoEstado = Boolean(activo);
+    if (Boolean(usuario.activo) === nuevoEstado) {
+      return usuario;
+    }
+
+    const actualizado = await UsuarioRepository.updateById(id, {
+      $set: { activo: nuevoEstado },
+      $push: {
+        trazabilidad: crearTrazabilidad(
+          adminId,
+          "actualizacion",
+          nuevoEstado ? "Usuario reactivado" : "Usuario desactivado",
+        ),
+      },
+    });
+
+    logAccionUsuario(
+      adminId,
+      nuevoEstado ? "REACTIVAR_USUARIO" : "DESACTIVAR_USUARIO",
+      { usuarioActualizado: id, activo: nuevoEstado },
+    );
+
+    return actualizado;
+  }
+
+  async eliminarUsuarioFisico(id, adminId) {
+    const usuario = await UsuarioRepository.findById(id);
+    if (!usuario) throw new ErrorApi(404, "Usuario no encontrado");
+
+    if (usuario._id.toString() === adminId) {
+      throw new ErrorApi(400, "No puedes eliminar tu propia cuenta");
+    }
+
+    await UsuarioRepository.deleteById(id);
+    logAccionUsuario(adminId, "ELIMINAR_USUARIO_FISICO", {
+      usuarioEliminado: id,
+    });
   }
 }
 

@@ -4,7 +4,7 @@ const permisoSchema = {
     modulo: { type: "string" },
     accion: {
       type: "string",
-      enum: ["ver", "crear", "actualizar", "eliminar"],
+      enum: ["ver", "crear", "actualizar", "estado", "eliminar"],
     },
   },
   required: ["modulo", "accion"],
@@ -225,6 +225,22 @@ const schemaReactivarRol = {
   },
 };
 
+const schemaEliminarRolFisico = {
+  summary: "Eliminar rol permanentemente",
+  description: "Eliminar rol de forma física",
+  tags: ["Roles"],
+  security: [{ bearerAuth: [] }],
+  params: {
+    type: "object",
+    properties: { id: { type: "string" } },
+    required: ["id"],
+  },
+  response: {
+    200: { description: "Rol eliminado permanentemente" },
+    404: { description: "Rol no encontrado" },
+  },
+};
+
 const rolTags = [{ name: "Roles", description: "Gestión de roles y permisos" }];
 
 export {
@@ -235,5 +251,6 @@ export {
   schemaActualizarRol,
   schemaEliminarRol,
   schemaReactivarRol,
+  schemaEliminarRolFisico,
   rolTags,
 };

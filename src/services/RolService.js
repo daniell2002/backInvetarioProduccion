@@ -114,6 +114,14 @@ class RolService {
     logAccionUsuario(adminId, "REACTIVAR_ROL", { rolReactivado: id });
     return actualizado;
   }
+
+  async eliminarRolFisico(id, adminId) {
+    const rol = await RolRepository.findById(id);
+    if (!rol) throw new ErrorApi(404, "Rol no encontrado");
+
+    await RolRepository.deleteById(id);
+    logAccionUsuario(adminId, "ELIMINAR_ROL_FISICO", { rolEliminado: id });
+  }
 }
 
 export default new RolService();
