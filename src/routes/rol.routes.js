@@ -8,6 +8,8 @@ import {
   schemaObtenerRol,
   schemaActualizarRol,
   schemaEliminarRol,
+  schemaReactivarRol,
+  schemaEliminarRolFisico,
 } from "../docs/rol.docs.js";
 
 async function rolRoutes(fastify) {
@@ -33,6 +35,14 @@ async function rolRoutes(fastify) {
   );
   fastify.delete("/:id", { schema: schemaEliminarRol }, (req, reply) =>
     RolController.eliminar(req, reply),
+  );
+  fastify.put("/:id/reactivar", { schema: schemaReactivarRol }, (req, reply) =>
+    RolController.reactivar(req, reply),
+  );
+  fastify.delete(
+    "/:id/fisico",
+    { schema: schemaEliminarRolFisico },
+    (req, reply) => RolController.eliminarFisico(req, reply),
   );
 }
 

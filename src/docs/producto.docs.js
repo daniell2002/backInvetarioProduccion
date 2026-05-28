@@ -5,34 +5,15 @@ const schemaCrearProducto = {
   security: [{ bearerAuth: [] }],
   body: {
     type: "object",
-    required: ["nombre"],
+    required: ["nombre", "unidadMedidaId"],
     properties: {
       nombre: { type: "string", minLength: 2, maxLength: 150 },
       descripcion: { type: "string", maxLength: 500 },
       codigoExterno: { type: "string" },
       categoriaId: { type: "string" },
       subcategoriaId: { type: "string" },
-      presentaciones: {
-        type: "array",
-        items: {
-          type: "object",
-          required: ["tipo", "unidadMedida"],
-          properties: {
-            tipo: { type: "string", maxLength: 50 },
-            unidadMedida: { type: "string", maxLength: 20 },
-            cantidadPorUnidad: { type: "number", minimum: 0 },
-            unidadContenido: { type: "string", maxLength: 30 },
-            cantidadInterna: { type: "number", minimum: 0 },
-            metrosLineales: { type: "number", minimum: 0 },
-            largoCm: { type: "number", minimum: 0 },
-            anchoCm: { type: "number", minimum: 0 },
-            altoCm: { type: "number", minimum: 0 },
-            espesorMm: { type: "number", minimum: 0 },
-            pesoKg: { type: "number", minimum: 0 },
-            descripcion: { type: "string", maxLength: 220 },
-          },
-        },
-      },
+      unidadMedidaId: { type: "string", minLength: 24, maxLength: 24 },
+      valorUnitario: { type: "number", minimum: 0 },
       stockMinimo: { type: "number", minimum: 0 },
       stockMaximo: { type: "number", minimum: 0 },
       imagen: { type: "string" },
@@ -47,9 +28,15 @@ const schemaCrearProducto = {
 
 const schemaListarProductos = {
   summary: "Listar productos",
-  description: "Listar productos activos",
+  description: "Listar productos (activos por defecto)",
   tags: ["Productos"],
   security: [{ bearerAuth: [] }],
+  querystring: {
+    type: "object",
+    properties: {
+      incluirInactivos: { type: "boolean", default: false },
+    },
+  },
   response: {
     200: {
       description: "Productos obtenidos",
@@ -97,12 +84,13 @@ const schemaListarProductosPaginado = {
     type: "object",
     properties: {
       pagina: { type: "integer", minimum: 1, default: 1 },
-      limite: { type: "integer", minimum: 1, maximum: 100, default: 20 },
+      limite: { type: "integer", minimum: 1, maximum: 10000, default: 20 },
       nombre: { type: "string" },
       categoriaId: { type: "string" },
       subcategoriaId: { type: "string" },
       codigoInterno: { type: "string" },
       codigoExterno: { type: "string" },
+      incluirInactivos: { type: "boolean", default: false },
     },
   },
   response: {
@@ -197,26 +185,8 @@ const schemaActualizarProducto = {
       codigoExterno: { type: "string" },
       categoriaId: { type: "string" },
       subcategoriaId: { type: "string" },
-      presentaciones: {
-        type: "array",
-        items: {
-          type: "object",
-          properties: {
-            tipo: { type: "string", maxLength: 50 },
-            unidadMedida: { type: "string", maxLength: 20 },
-            cantidadPorUnidad: { type: "number", minimum: 0 },
-            unidadContenido: { type: "string", maxLength: 30 },
-            cantidadInterna: { type: "number", minimum: 0 },
-            metrosLineales: { type: "number", minimum: 0 },
-            largoCm: { type: "number", minimum: 0 },
-            anchoCm: { type: "number", minimum: 0 },
-            altoCm: { type: "number", minimum: 0 },
-            espesorMm: { type: "number", minimum: 0 },
-            pesoKg: { type: "number", minimum: 0 },
-            descripcion: { type: "string", maxLength: 220 },
-          },
-        },
-      },
+      unidadMedidaId: { type: "string", minLength: 24, maxLength: 24 },
+      valorUnitario: { type: "number", minimum: 0 },
       stockMinimo: { type: "number", minimum: 0 },
       stockMaximo: { type: "number", minimum: 0 },
       imagen: { type: "string" },
@@ -230,7 +200,7 @@ const schemaActualizarProducto = {
 };
 
 const schemaEliminarProducto = {
-  summary: "Eliminar producto",
+  summary: "Desactivar producto",
   description: "Eliminar producto (soft delete)",
   tags: ["Productos"],
   security: [{ bearerAuth: [] }],
@@ -241,6 +211,46 @@ const schemaEliminarProducto = {
   },
   response: {
     200: { description: "Producto desactivado" },
+    404: { description: "Producto no encontrado" },
+  },
+};
+
+const schemaActualizarEstadoProducto = {
+  summary: "Actualizar estado de producto",
+  description: "Activar o desactivar producto",
+  tags: ["Productos"],
+  security: [{ bearerAuth: [] }],
+  params: {
+    type: "object",
+    properties: { id: { type: "string" } },
+    required: ["id"],
+  },
+  body: {
+    type: "object",
+    required: ["activo"],
+    properties: {
+      activo: { type: "boolean" },
+    },
+    additionalProperties: false,
+  },
+  response: {
+    200: { description: "Estado actualizado" },
+    404: { description: "Producto no encontrado" },
+  },
+};
+
+const schemaEliminarProductoFisico = {
+  summary: "Eliminar producto permanentemente",
+  description: "Eliminar producto de forma física",
+  tags: ["Productos"],
+  security: [{ bearerAuth: [] }],
+  params: {
+    type: "object",
+    properties: { id: { type: "string" } },
+    required: ["id"],
+  },
+  response: {
+    200: { description: "Producto eliminado permanentemente" },
     404: { description: "Producto no encontrado" },
   },
 };
@@ -256,5 +266,7 @@ export {
   schemaObtenerProducto,
   schemaActualizarProducto,
   schemaEliminarProducto,
+  schemaActualizarEstadoProducto,
+  schemaEliminarProductoFisico,
   productoTags,
 };

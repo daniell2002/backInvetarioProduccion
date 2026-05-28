@@ -8,17 +8,28 @@ class SedeController {
   }
 
   async listar(request, reply) {
-    const sedes = await SedeService.obtenerSedes();
+    const incluirInactivas = request.query?.incluirInactivas === true;
+    const sedes = await SedeService.obtenerSedes(incluirInactivas);
     return RespuestaApi.exito(reply, "Sedes obtenidas", { sedes });
   }
 
   async listarPaginado(request, reply) {
-    const { pagina = 1, limite = 50, nombre, ciudad, codigo } = request.query;
+    const {
+      pagina = 1,
+      limite = 50,
+      nombre,
+      ciudad,
+      codigo,
+      incluirInactivas,
+    } = request.query;
 
     const filtros = {};
     if (nombre) filtros.nombre = nombre;
     if (ciudad) filtros.ciudad = ciudad;
     if (codigo) filtros.codigo = codigo;
+    if (incluirInactivas !== undefined) {
+      filtros.incluirInactivas = incluirInactivas === true;
+    }
 
     const resultado = await SedeService.obtenerSedesPaginado(
       Number(pagina),
@@ -49,6 +60,20 @@ class SedeController {
   async eliminar(request, reply) {
     await SedeService.eliminarSede(request.params.id, request.usuarioId);
     return RespuestaApi.exito(reply, "Sede desactivada exitosamente");
+  }
+
+  async actualizarEstado(request, reply) {
+    const sede = await SedeService.actualizarEstadoSede(
+      request.params.id,
+      request.body?.activo,
+      request.usuarioId,
+    );
+    return RespuestaApi.exito(reply, "Estado de sede actualizado", { sede });
+  }
+
+  async eliminarFisica(request, reply) {
+    await SedeService.eliminarSedeFisica(request.params.id, request.usuarioId);
+    return RespuestaApi.exito(reply, "Sede eliminada permanentemente");
   }
 }
 

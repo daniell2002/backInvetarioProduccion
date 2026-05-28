@@ -42,7 +42,10 @@ class ProductoRepository extends BaseRepository {
   }
 
   construirFiltros(filtros) {
-    const consulta = { activo: true };
+    const consulta = {};
+    if (filtros.activo !== undefined) {
+      consulta.activo = filtros.activo;
+    }
     if (filtros.nombre)
       consulta.nombre = { $regex: filtros.nombre, $options: "i" };
     if (filtros.categoriaId) consulta.categoriaId = filtros.categoriaId;

@@ -23,9 +23,15 @@ const schemaCrearSede = {
 
 const schemaListarSedes = {
   summary: "Listar sedes",
-  description: "Listar todas las sedes activas",
+  description: "Listar sedes (activas por defecto)",
   tags: ["Sedes"],
   security: [{ bearerAuth: [] }],
+  querystring: {
+    type: "object",
+    properties: {
+      incluirInactivas: { type: "boolean", default: false },
+    },
+  },
   response: {
     200: {
       description: "Sedes obtenidas",
@@ -71,7 +77,7 @@ const schemaListarSedes = {
 
 const schemaListarSedesPaginado = {
   summary: "Listar sedes paginado",
-  description: "Listar sedes activas con paginación y filtros",
+  description: "Listar sedes con paginación y filtros",
   tags: ["Sedes"],
   security: [{ bearerAuth: [] }],
   querystring: {
@@ -82,6 +88,7 @@ const schemaListarSedesPaginado = {
       nombre: { type: "string" },
       ciudad: { type: "string" },
       codigo: { type: "string" },
+      incluirInactivas: { type: "boolean", default: false },
     },
   },
   response: {
@@ -191,7 +198,7 @@ const schemaActualizarSede = {
 };
 
 const schemaEliminarSede = {
-  summary: "Eliminar sede",
+  summary: "Desactivar sede",
   description: "Desactivar sede (soft delete)",
   tags: ["Sedes"],
   security: [{ bearerAuth: [] }],
@@ -202,6 +209,46 @@ const schemaEliminarSede = {
   },
   response: {
     200: { description: "Sede desactivada" },
+    404: { description: "Sede no encontrada" },
+  },
+};
+
+const schemaActualizarEstadoSede = {
+  summary: "Actualizar estado de sede",
+  description: "Activar o desactivar una sede",
+  tags: ["Sedes"],
+  security: [{ bearerAuth: [] }],
+  params: {
+    type: "object",
+    properties: { id: { type: "string" } },
+    required: ["id"],
+  },
+  body: {
+    type: "object",
+    required: ["activo"],
+    properties: {
+      activo: { type: "boolean" },
+    },
+    additionalProperties: false,
+  },
+  response: {
+    200: { description: "Estado actualizado" },
+    404: { description: "Sede no encontrada" },
+  },
+};
+
+const schemaEliminarSedeFisica = {
+  summary: "Eliminar sede permanentemente",
+  description: "Eliminar sede de forma física",
+  tags: ["Sedes"],
+  security: [{ bearerAuth: [] }],
+  params: {
+    type: "object",
+    properties: { id: { type: "string" } },
+    required: ["id"],
+  },
+  response: {
+    200: { description: "Sede eliminada permanentemente" },
     404: { description: "Sede no encontrada" },
   },
 };
@@ -217,5 +264,7 @@ export {
   schemaObtenerSede,
   schemaActualizarSede,
   schemaEliminarSede,
+  schemaActualizarEstadoSede,
+  schemaEliminarSedeFisica,
   sedeTags,
 };

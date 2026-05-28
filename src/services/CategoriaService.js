@@ -30,6 +30,9 @@ class CategoriaService {
   }
 
   async obtenerCategoriasPaginado(pagina, limite, filtros = {}) {
+    const escaparRegex = (texto = "") =>
+      String(texto).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
     const filtroConsulta = { activo: true };
 
     if (filtros.nombre) {
@@ -39,6 +42,25 @@ class CategoriaService {
       filtroConsulta.descripcion = {
         $regex: filtros.descripcion,
         $options: "i",
+      };
+    }
+    if (filtros.busqueda) {
+      const regexBusqueda = escaparRegex(filtros.busqueda);
+      filtroConsulta.$or = [
+        { nombre: { $regex: regexBusqueda, $options: "i" } },
+        { descripcion: { $regex: regexBusqueda, $options: "i" } },
+      ];
+    }
+    if (filtros.subcategoriaNombre) {
+      const regexSubcategoria = {
+        $regex: `^${escaparRegex(filtros.subcategoriaNombre)}$`,
+        $options: "i",
+      };
+      filtroConsulta.subcategorias = {
+        $elemMatch: {
+          $or: [{ nombre: regexSubcategoria }, { descripcion: regexSubcategoria }],
+          activo: true,
+        },
       };
     }
 

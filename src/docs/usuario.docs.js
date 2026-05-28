@@ -24,9 +24,15 @@ const schemaCrearUsuario = {
 
 const schemaListarUsuarios = {
   summary: "Listar usuarios",
-  description: "Listar usuarios activos",
+  description: "Listar usuarios (activos por defecto)",
   tags: ["Usuarios"],
   security: [{ bearerAuth: [] }],
+  querystring: {
+    type: "object",
+    properties: {
+      incluirInactivos: { type: "boolean", default: false },
+    },
+  },
   response: {
     200: {
       description: "Usuarios obtenidos exitosamente",
@@ -80,6 +86,7 @@ const schemaListarUsuariosPaginado = {
       sedeId: { type: "string" },
       rolId: { type: "string" },
       esAdmin: { type: "boolean" },
+      incluirInactivos: { type: "boolean", default: false },
     },
   },
   response: {
@@ -184,7 +191,7 @@ const schemaActualizarUsuario = {
 };
 
 const schemaEliminarUsuario = {
-  summary: "Eliminar usuario",
+  summary: "Desactivar usuario",
   description: "Desactivar usuario (soft delete)",
   tags: ["Usuarios"],
   security: [{ bearerAuth: [] }],
@@ -195,6 +202,46 @@ const schemaEliminarUsuario = {
   },
   response: {
     200: { description: "Usuario desactivado" },
+    404: { description: "Usuario no encontrado" },
+  },
+};
+
+const schemaActualizarEstadoUsuario = {
+  summary: "Actualizar estado de usuario",
+  description: "Activar o desactivar usuario",
+  tags: ["Usuarios"],
+  security: [{ bearerAuth: [] }],
+  params: {
+    type: "object",
+    properties: { id: { type: "string" } },
+    required: ["id"],
+  },
+  body: {
+    type: "object",
+    required: ["activo"],
+    properties: {
+      activo: { type: "boolean" },
+    },
+    additionalProperties: false,
+  },
+  response: {
+    200: { description: "Estado actualizado" },
+    404: { description: "Usuario no encontrado" },
+  },
+};
+
+const schemaEliminarUsuarioFisico = {
+  summary: "Eliminar usuario permanentemente",
+  description: "Eliminar usuario de forma física",
+  tags: ["Usuarios"],
+  security: [{ bearerAuth: [] }],
+  params: {
+    type: "object",
+    properties: { id: { type: "string" } },
+    required: ["id"],
+  },
+  response: {
+    200: { description: "Usuario eliminado permanentemente" },
     404: { description: "Usuario no encontrado" },
   },
 };
@@ -210,5 +257,7 @@ export {
   schemaObtenerUsuario,
   schemaActualizarUsuario,
   schemaEliminarUsuario,
+  schemaActualizarEstadoUsuario,
+  schemaEliminarUsuarioFisico,
   usuarioTags,
 };

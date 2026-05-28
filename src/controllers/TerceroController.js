@@ -11,7 +11,11 @@ class TerceroController {
   }
 
   async listar(request, reply) {
-    const terceros = await TerceroService.obtenerTerceros();
+    const incluirInactivos = request.query?.incluirInactivos === true;
+    const terceros = await TerceroService.obtenerTerceros(
+      {},
+      incluirInactivos,
+    );
     return RespuestaApi.exito(reply, "Terceros obtenidos", { terceros });
   }
 
@@ -22,11 +26,15 @@ class TerceroController {
       tipo,
       razonSocial,
       numeroDocumento,
+      incluirInactivos,
     } = request.query;
     const filtros = {};
     if (tipo) filtros.tipo = tipo;
     if (razonSocial) filtros.razonSocial = razonSocial;
     if (numeroDocumento) filtros.numeroDocumento = numeroDocumento;
+    if (incluirInactivos !== undefined) {
+      filtros.incluirInactivos = incluirInactivos === true;
+    }
 
     const resultado = await TerceroService.obtenerTercerosPaginado(
       Number(pagina),
@@ -55,7 +63,26 @@ class TerceroController {
 
   async eliminar(request, reply) {
     await TerceroService.eliminarTercero(request.params.id, request.usuarioId);
-    return RespuestaApi.exito(reply, "Tercero eliminado");
+    return RespuestaApi.exito(reply, "Tercero desactivado");
+  }
+
+  async actualizarEstado(request, reply) {
+    const tercero = await TerceroService.actualizarEstadoTercero(
+      request.params.id,
+      request.body?.activo,
+      request.usuarioId,
+    );
+    return RespuestaApi.exito(reply, "Estado de tercero actualizado", {
+      tercero,
+    });
+  }
+
+  async eliminarFisico(request, reply) {
+    await TerceroService.eliminarTerceroFisico(
+      request.params.id,
+      request.usuarioId,
+    );
+    return RespuestaApi.exito(reply, "Tercero eliminado permanentemente");
   }
 }
 

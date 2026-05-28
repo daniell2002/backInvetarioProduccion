@@ -8,6 +8,8 @@ import {
   schemaObtenerTercero,
   schemaActualizarTercero,
   schemaEliminarTercero,
+  schemaActualizarEstadoTercero,
+  schemaEliminarTerceroFisico,
 } from "../docs/tercero.docs.js";
 
 async function terceroRoutes(fastify) {
@@ -62,9 +64,27 @@ async function terceroRoutes(fastify) {
     "/:id",
     {
       schema: schemaEliminarTercero,
-      preHandler: verificarPermiso("terceros", "eliminar"),
+      preHandler: verificarPermiso("terceros", "estado"),
     },
     (req, reply) => TerceroController.eliminar(req, reply),
+  );
+
+  fastify.patch(
+    "/:id/estado",
+    {
+      schema: schemaActualizarEstadoTercero,
+      preHandler: verificarPermiso("terceros", "estado"),
+    },
+    (req, reply) => TerceroController.actualizarEstado(req, reply),
+  );
+
+  fastify.delete(
+    "/:id/fisico",
+    {
+      schema: schemaEliminarTerceroFisico,
+      preHandler: verificarPermiso("terceros", "eliminar"),
+    },
+    (req, reply) => TerceroController.eliminarFisico(req, reply),
   );
 }
 

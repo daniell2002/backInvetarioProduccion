@@ -18,6 +18,10 @@ class SedeRepository extends BaseRepository {
     return this.model.find({ activo: true }).sort({ nombre: 1 });
   }
 
+  async findAll(filtro = {}) {
+    return this.model.find(filtro).sort({ nombre: 1 });
+  }
+
   async findByIdConResponsable(id) {
     return this.model.findById(id).populate("responsableId", "nombre email");
   }

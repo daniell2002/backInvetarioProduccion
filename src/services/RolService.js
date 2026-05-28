@@ -24,8 +24,13 @@ class RolService {
     return await RolRepository.findAllActivos();
   }
 
-  async obtenerRolesPaginado(pagina, limite, filtros = {}) {
-    const filtroConsulta = { activo: true };
+  async obtenerRolesPaginado(
+    pagina,
+    limite,
+    filtros = {},
+    incluirInactivos = false,
+  ) {
+    const filtroConsulta = incluirInactivos ? {} : { activo: true };
 
     if (filtros.nombre) {
       filtroConsulta.nombre = { $regex: filtros.nombre, $options: "i" };
@@ -88,6 +93,34 @@ class RolService {
       },
     });
     logAccionUsuario(adminId, "ELIMINAR_ROL", { rolEliminado: id });
+  }
+
+  async reactivarRol(id, adminId) {
+    const rol = await RolRepository.findById(id);
+    if (!rol) throw new ErrorApi(404, "Rol no encontrado");
+    if (rol.activo) throw new ErrorApi(400, "El rol ya está activo");
+
+    const actualizado = await RolRepository.updateById(id, {
+      $set: { activo: true },
+      $push: {
+        trazabilidad: crearTrazabilidad(
+          adminId,
+          "actualizacion",
+          "Rol reactivado",
+        ),
+      },
+    });
+
+    logAccionUsuario(adminId, "REACTIVAR_ROL", { rolReactivado: id });
+    return actualizado;
+  }
+
+  async eliminarRolFisico(id, adminId) {
+    const rol = await RolRepository.findById(id);
+    if (!rol) throw new ErrorApi(404, "Rol no encontrado");
+
+    await RolRepository.deleteById(id);
+    logAccionUsuario(adminId, "ELIMINAR_ROL_FISICO", { rolEliminado: id });
   }
 }
 

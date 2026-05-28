@@ -31,9 +31,15 @@ const schemaCrearTercero = {
 
 const schemaListarTerceros = {
   summary: "Listar terceros",
-  description: "Listar terceros activos",
+  description: "Listar terceros (activos por defecto)",
   tags: ["Terceros"],
   security: [{ bearerAuth: [] }],
+  querystring: {
+    type: "object",
+    properties: {
+      incluirInactivos: { type: "boolean", default: false },
+    },
+  },
   response: {
     200: {
       description: "Terceros obtenidos",
@@ -85,6 +91,7 @@ const schemaListarTercerosPaginado = {
       tipo: { type: "string", enum: ["proveedor", "cliente", "ambos"] },
       razonSocial: { type: "string" },
       numeroDocumento: { type: "string" },
+      incluirInactivos: { type: "boolean", default: false },
     },
   },
   response: {
@@ -197,8 +204,8 @@ const schemaActualizarTercero = {
 };
 
 const schemaEliminarTercero = {
-  summary: "Eliminar tercero",
-  description: "Eliminar tercero (soft delete)",
+  summary: "Desactivar tercero",
+  description: "Desactivar tercero (soft delete)",
   tags: ["Terceros"],
   security: [{ bearerAuth: [] }],
   params: {
@@ -208,6 +215,46 @@ const schemaEliminarTercero = {
   },
   response: {
     200: { description: "Tercero desactivado" },
+    404: { description: "Tercero no encontrado" },
+  },
+};
+
+const schemaActualizarEstadoTercero = {
+  summary: "Actualizar estado de tercero",
+  description: "Activar o desactivar un tercero",
+  tags: ["Terceros"],
+  security: [{ bearerAuth: [] }],
+  params: {
+    type: "object",
+    properties: { id: { type: "string" } },
+    required: ["id"],
+  },
+  body: {
+    type: "object",
+    required: ["activo"],
+    properties: {
+      activo: { type: "boolean" },
+    },
+    additionalProperties: false,
+  },
+  response: {
+    200: { description: "Estado actualizado" },
+    404: { description: "Tercero no encontrado" },
+  },
+};
+
+const schemaEliminarTerceroFisico = {
+  summary: "Eliminar tercero permanentemente",
+  description: "Eliminar tercero de forma física",
+  tags: ["Terceros"],
+  security: [{ bearerAuth: [] }],
+  params: {
+    type: "object",
+    properties: { id: { type: "string" } },
+    required: ["id"],
+  },
+  response: {
+    200: { description: "Tercero eliminado permanentemente" },
     404: { description: "Tercero no encontrado" },
   },
 };
@@ -223,5 +270,7 @@ export {
   schemaObtenerTercero,
   schemaActualizarTercero,
   schemaEliminarTercero,
+  schemaActualizarEstadoTercero,
+  schemaEliminarTerceroFisico,
   terceroTags,
 };

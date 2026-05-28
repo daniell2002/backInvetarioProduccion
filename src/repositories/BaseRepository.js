@@ -56,6 +56,10 @@ class BaseRepository {
     );
   }
 
+  async deleteById(id, opciones = {}) {
+    return await this.model.findByIdAndDelete(id, opciones);
+  }
+
   async countDocuments(filtro = {}) {
     return await this.model.countDocuments(filtro);
   }

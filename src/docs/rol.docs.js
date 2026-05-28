@@ -4,7 +4,7 @@ const permisoSchema = {
     modulo: { type: "string" },
     accion: {
       type: "string",
-      enum: ["ver", "crear", "actualizar", "eliminar"],
+      enum: ["ver", "crear", "actualizar", "estado", "eliminar"],
     },
   },
   required: ["modulo", "accion"],
@@ -79,7 +79,7 @@ const schemaListarRoles = {
 
 const schemaListarRolesPaginado = {
   summary: "Listar roles paginado",
-  description: "Listar roles activos con paginación y filtros",
+  description: "Listar roles con paginación y filtros",
   tags: ["Roles"],
   security: [{ bearerAuth: [] }],
   querystring: {
@@ -89,6 +89,7 @@ const schemaListarRolesPaginado = {
       limite: { type: "integer", minimum: 1, maximum: 100, default: 50 },
       nombre: { type: "string" },
       descripcion: { type: "string" },
+      incluirInactivos: { type: "boolean", default: false },
     },
   },
   response: {
@@ -208,6 +209,38 @@ const schemaEliminarRol = {
   },
 };
 
+const schemaReactivarRol = {
+  summary: "Reactivar rol",
+  description: "Reactivar rol desactivado",
+  tags: ["Roles"],
+  security: [{ bearerAuth: [] }],
+  params: {
+    type: "object",
+    properties: { id: { type: "string" } },
+    required: ["id"],
+  },
+  response: {
+    200: { description: "Rol reactivado" },
+    404: { description: "Rol no encontrado" },
+  },
+};
+
+const schemaEliminarRolFisico = {
+  summary: "Eliminar rol permanentemente",
+  description: "Eliminar rol de forma física",
+  tags: ["Roles"],
+  security: [{ bearerAuth: [] }],
+  params: {
+    type: "object",
+    properties: { id: { type: "string" } },
+    required: ["id"],
+  },
+  response: {
+    200: { description: "Rol eliminado permanentemente" },
+    404: { description: "Rol no encontrado" },
+  },
+};
+
 const rolTags = [{ name: "Roles", description: "Gestión de roles y permisos" }];
 
 export {
@@ -217,5 +250,7 @@ export {
   schemaObtenerRol,
   schemaActualizarRol,
   schemaEliminarRol,
+  schemaReactivarRol,
+  schemaEliminarRolFisico,
   rolTags,
 };

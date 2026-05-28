@@ -110,8 +110,30 @@ const iniciar = async () => {
     });
 
     // 2. CORS
+    const puerto = Number(process.env.PORT) || 3080;
+    const origenesBase = (
+      process.env.CORS_ORIGINS ||
+      process.env.FRONTEND_URL ||
+      "http://localhost:5173"
+    )
+      .split(",")
+      .map((o) => o.trim())
+      .filter(Boolean);
+
+    // Agregar automáticamente las IPs de red del servidor (para que Scalar funcione desde red local)
+    const origenesPermitidos = new Set(origenesBase);
+    origenesPermitidos.add(`http://localhost:${puerto}`);
+    origenesPermitidos.add(`http://127.0.0.1:${puerto}`);
+    for (const ip of obtenerIpsIPv4Locales()) {
+      origenesPermitidos.add(`http://${ip}:${puerto}`);
+    }
+
     await aplicacion.register(import("@fastify/cors"), {
-      origin: process.env.FRONTEND_URL || "http://localhost:5173",
+      origin: (origen, cb) => {
+        if (!origen) return cb(null, true);
+        if (origenesPermitidos.has(origen)) return cb(null, true);
+        cb(new Error(`Origen no permitido por CORS: ${origen}`), false);
+      },
       credentials: true,
       methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     });
@@ -130,13 +152,21 @@ const iniciar = async () => {
     // 4. Cookies
     await aplicacion.register(import("@fastify/cookie"));
 
-    // 5. JWT
+    // 5. Multipart (subida de archivos)
+    await aplicacion.register(import("@fastify/multipart"), {
+      limits: {
+        fileSize: 10 * 1024 * 1024, // 10 MB máximo
+        files: 1,
+      },
+    });
+
+    // 6. JWT
     await aplicacion.register(import("@fastify/jwt"), {
       secret: process.env.JWT_SECRET,
       sign: { expiresIn: process.env.JWT_EXPIRES_IN || "1h" },
     });
 
-    // 6. Documentación OpenAPI + Scalar
+    // 7. Documentación OpenAPI + Scalar
     await aplicacion.register(import("@fastify/swagger"), {
       openapi: especificacionOpenApi,
     });
@@ -144,17 +174,15 @@ const iniciar = async () => {
       routePrefix: "/docs",
     });
 
-    // 7. Decoradores de request
+    // 8. Decoradores de request
     aplicacion.decorateRequest("usuarioId", null);
     aplicacion.decorateRequest("usuario", null);
     aplicacion.decorateRequest("sedeUsuario", null);
 
-    // 8. Rutas
+    // 9. Rutas
     await aplicacion.register(import("./src/routes/index.js"), {
       prefix: "/api",
     });
-
-    const puerto = Number(process.env.PORT) || 3080;
 
     await aplicacion.listen({
       port: puerto,
