@@ -22,10 +22,11 @@ const rutasAuth = async (fastify, opciones) => {
     AuthController.login,
   );
 
-  // POST /api/v1/auth/renovar-token
+  // POST /api/v1/auth/renovar-token (límite alto — se invoca automáticamente al renovar sesión)
   fastify.post(
     "/renovar-token",
     {
+      config: { rateLimit: { max: 60, timeWindow: "15 minutes" } },
       schema: schemaRenovarToken,
     },
     AuthController.renovarToken,
@@ -70,10 +71,11 @@ const rutasAuth = async (fastify, opciones) => {
     AuthController.restablecerContrasena,
   );
 
-  // GET /api/v1/auth/perfil
+  // GET /api/v1/auth/perfil (límite alto — se invoca en cada carga de página)
   fastify.get(
     "/perfil",
     {
+      config: { rateLimit: { max: 120, timeWindow: "15 minutes" } },
       preHandler: [autenticar],
       schema: schemaPerfil,
     },
