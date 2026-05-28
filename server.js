@@ -87,6 +87,15 @@ aplicacion.setErrorHandler((error, request, reply) => {
     });
   }
 
+  // Rate limit (429) — @fastify/rate-limit lanza error con statusCode 429
+  if (error.statusCode === 429) {
+    return reply.status(429).send({
+      statusCode: 429,
+      status: "fail",
+      message: error.message || "Demasiadas solicitudes. Intenta de nuevo más tarde.",
+    });
+  }
+
   // Error inesperado
   return reply.status(500).send({
     statusCode: 500,
@@ -140,9 +149,9 @@ const iniciar = async () => {
 
     // 3. Rate Limiting global
     await aplicacion.register(import("@fastify/rate-limit"), {
-      max: 100,
+      max: 300,
       timeWindow: "15 minutes",
-      errorResponseBuilder: () => ({
+      errorResponseBuilder: (_request, _context) => ({
         statusCode: 429,
         status: "fail",
         message: "Demasiadas solicitudes. Intenta de nuevo en 15 minutos.",
@@ -163,7 +172,7 @@ const iniciar = async () => {
     // 6. JWT
     await aplicacion.register(import("@fastify/jwt"), {
       secret: process.env.JWT_SECRET,
-      sign: { expiresIn: process.env.JWT_EXPIRES_IN || "1h" },
+      sign: { expiresIn: process.env.JWT_EXPIRES_IN || "8h" },
     });
 
     // 7. Documentación OpenAPI + Scalar
