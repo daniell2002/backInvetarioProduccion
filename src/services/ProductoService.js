@@ -43,11 +43,29 @@ class ProductoService {
   }
 
   async obtenerProductosPaginado(pagina, limite, filtros = {}) {
-    const filtroConsulta = { ...filtros };
+    const escaparRegex = (texto = "") =>
+      String(texto).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+    const filtroConsulta = {};
+
     if (!filtros.incluirInactivos) {
       filtroConsulta.activo = true;
     }
-    delete filtroConsulta.incluirInactivos;
+    if (filtros.nombre) {
+      filtroConsulta.nombre = { $regex: escaparRegex(filtros.nombre), $options: "i" };
+    }
+    if (filtros.codigoInterno) {
+      filtroConsulta.codigoInterno = { $regex: escaparRegex(filtros.codigoInterno), $options: "i" };
+    }
+    if (filtros.codigoExterno) {
+      filtroConsulta.codigoExterno = { $regex: escaparRegex(filtros.codigoExterno), $options: "i" };
+    }
+    if (filtros.categoriaId) {
+      filtroConsulta.categoriaId = filtros.categoriaId;
+    }
+    if (filtros.subcategoriaId) {
+      filtroConsulta.subcategoriaId = filtros.subcategoriaId;
+    }
 
     return await ProductoRepository.findPaginado(
       filtroConsulta,
