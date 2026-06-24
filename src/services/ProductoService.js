@@ -1,4 +1,5 @@
 import ProductoRepository from "../repositories/ProductoRepository.js";
+import StockRepository from "../repositories/StockRepository.js";
 import ErrorApi from "../utils/ErrorApi.js";
 import { generarCodigo } from "../utils/generadorCodigo.util.js";
 import { logAccionUsuario } from "../config/logger.js";
@@ -66,12 +67,20 @@ class ProductoService {
     if (filtros.subcategoriaId) {
       filtroConsulta.subcategoriaId = filtros.subcategoriaId;
     }
+    if (filtros.sedeId) {
+      const productoIds = await StockRepository.findProductoIdsBySedeId(filtros.sedeId);
+      filtroConsulta._id = { $in: productoIds };
+    }
 
     return await ProductoRepository.findPaginado(
       filtroConsulta,
       pagina,
       limite,
     );
+  }
+
+  async buscarPorCodigo(codigo) {
+    return ProductoRepository.findByCodigo(codigo);
   }
 
   async obtenerProductoPorId(id) {
