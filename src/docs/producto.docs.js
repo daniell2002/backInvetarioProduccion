@@ -90,6 +90,11 @@ const schemaListarProductosPaginado = {
       subcategoriaId: { type: "string" },
       codigoInterno: { type: "string" },
       codigoExterno: { type: "string" },
+      busqueda: {
+        type: "string",
+        description:
+          "Búsqueda libre: coincide contra nombre, código interno, código externo o referencia",
+      },
       incluirInactivos: { type: "boolean", default: false },
     },
   },
@@ -159,6 +164,22 @@ const schemaObtenerProducto = {
     type: "object",
     properties: { id: { type: "string" } },
     required: ["id"],
+  },
+  response: {
+    200: { description: "Producto obtenido" },
+    404: { description: "Producto no encontrado" },
+  },
+};
+
+const schemaBuscarProductoPorCodigo = {
+  summary: "Buscar producto por código externo",
+  description: "Buscar producto activo por su código externo exacto",
+  tags: ["Productos"],
+  security: [{ bearerAuth: [] }],
+  querystring: {
+    type: "object",
+    properties: { codigo: { type: "string" } },
+    required: ["codigo"],
   },
   response: {
     200: { description: "Producto obtenido" },
@@ -264,6 +285,7 @@ export {
   schemaListarProductos,
   schemaListarProductosPaginado,
   schemaObtenerProducto,
+  schemaBuscarProductoPorCodigo,
   schemaActualizarProducto,
   schemaEliminarProducto,
   schemaActualizarEstadoProducto,

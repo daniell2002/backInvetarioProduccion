@@ -55,6 +55,15 @@ class ProductoRepository extends BaseRepository {
       consulta.codigoInterno = { $regex: filtros.codigoInterno, $options: "i" };
     if (filtros.codigoExterno)
       consulta.codigoExterno = { $regex: filtros.codigoExterno, $options: "i" };
+    if (filtros.busqueda) {
+      const regex = { $regex: filtros.busqueda, $options: "i" };
+      consulta.$or = [
+        { nombre: regex },
+        { codigoInterno: regex },
+        { codigoExterno: regex },
+        { referencia: regex },
+      ];
+    }
     return consulta;
   }
 }

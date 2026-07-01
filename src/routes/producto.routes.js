@@ -6,6 +6,7 @@ import {
   schemaListarProductos,
   schemaListarProductosPaginado,
   schemaObtenerProducto,
+  schemaBuscarProductoPorCodigo,
   schemaActualizarProducto,
   schemaEliminarProducto,
   schemaActualizarEstadoProducto,
@@ -40,6 +41,15 @@ async function productoRoutes(fastify) {
       preHandler: verificarPermiso("productos", "ver"),
     },
     (req, reply) => ProductoController.listarPaginado(req, reply),
+  );
+
+  fastify.get(
+    "/buscar-codigo",
+    {
+      schema: schemaBuscarProductoPorCodigo,
+      preHandler: verificarPermiso("productos", "ver"),
+    },
+    (req, reply) => ProductoController.buscarPorCodigo(req, reply),
   );
 
   fastify.get(

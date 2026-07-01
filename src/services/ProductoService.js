@@ -49,17 +49,21 @@ class ProductoService {
     }
     delete filtroConsulta.incluirInactivos;
 
-    return await ProductoRepository.findPaginado(
-      filtroConsulta,
-      pagina,
-      limite,
-    );
+    const consulta = ProductoRepository.construirFiltros(filtroConsulta);
+
+    return await ProductoRepository.findPaginado(consulta, pagina, limite);
   }
 
   async obtenerProductoPorId(id) {
     const producto = await ProductoRepository.findById(id);
     if (!producto || !producto.activo)
       throw new ErrorApi(404, "Producto no encontrado");
+    return producto;
+  }
+
+  async buscarPorCodigoExterno(codigo) {
+    const producto = await ProductoRepository.findByCodigoExterno(codigo);
+    if (!producto) throw new ErrorApi(404, "Producto no encontrado");
     return producto;
   }
 
