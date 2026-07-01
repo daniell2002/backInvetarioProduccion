@@ -14,6 +14,14 @@ class ProductoRepository extends BaseRepository {
     return this.model.findOne({ codigoExterno: codigo, activo: true });
   }
 
+  async findByCodigo(codigo) {
+    const q = (codigo || "").trim();
+    return this.model.findOne({
+      activo: true,
+      $or: [{ codigoExterno: q }, { codigoInterno: q }],
+    });
+  }
+
   async findPaginadoConUnidades(
     filtro = {},
     pagina = 1,
@@ -48,21 +56,24 @@ class ProductoRepository extends BaseRepository {
   }
 
   construirFiltros(filtros) {
+    const escaparRegex = (texto = "") =>
+      String(texto).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
     const consulta = {};
     if (filtros.activo !== undefined) {
       consulta.activo = filtros.activo;
     }
     if (filtros.nombre)
-      consulta.nombre = { $regex: filtros.nombre, $options: "i" };
+      consulta.nombre = { $regex: escaparRegex(filtros.nombre), $options: "i" };
     if (filtros.categoriaId) consulta.categoriaId = filtros.categoriaId;
     if (filtros.subcategoriaId)
       consulta.subcategoriaId = filtros.subcategoriaId;
     if (filtros.codigoInterno)
-      consulta.codigoInterno = { $regex: filtros.codigoInterno, $options: "i" };
+      consulta.codigoInterno = { $regex: escaparRegex(filtros.codigoInterno), $options: "i" };
     if (filtros.codigoExterno)
-      consulta.codigoExterno = { $regex: filtros.codigoExterno, $options: "i" };
+      consulta.codigoExterno = { $regex: escaparRegex(filtros.codigoExterno), $options: "i" };
     if (filtros.busqueda) {
-      const regex = { $regex: filtros.busqueda, $options: "i" };
+      const regex = { $regex: escaparRegex(filtros.busqueda), $options: "i" };
       consulta.$or = [
         { nombre: regex },
         { codigoInterno: regex },

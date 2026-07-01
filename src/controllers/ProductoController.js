@@ -60,16 +60,17 @@ class ProductoController {
     });
   }
 
+  async buscarPorCodigo(request, reply) {
+    const { codigo } = request.query;
+    if (!codigo) return RespuestaApi.error(reply, "Falta el parámetro codigo", 400);
+    const producto = await ProductoService.buscarPorCodigo(codigo);
+    if (!producto) return RespuestaApi.error(reply, "Producto no encontrado", 404);
+    return RespuestaApi.exito(reply, "Producto encontrado", { producto });
+  }
+
   async obtenerPorId(request, reply) {
     const producto = await ProductoService.obtenerProductoPorId(
       request.params.id,
-    );
-    return RespuestaApi.exito(reply, "Producto obtenido", { producto });
-  }
-
-  async buscarPorCodigo(request, reply) {
-    const producto = await ProductoService.buscarPorCodigoExterno(
-      request.query.codigo,
     );
     return RespuestaApi.exito(reply, "Producto obtenido", { producto });
   }

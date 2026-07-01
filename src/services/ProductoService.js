@@ -136,16 +136,14 @@ class ProductoService {
     return await ProductoRepository.findPaginadoConUnidades(consulta, pagina, limite);
   }
 
+  async buscarPorCodigo(codigo) {
+    return ProductoRepository.findByCodigo(codigo);
+  }
+
   async obtenerProductoPorId(id) {
     const producto = await ProductoRepository.findById(id);
     if (!producto || !producto.activo)
       throw new ErrorApi(404, "Producto no encontrado");
-    return producto;
-  }
-
-  async buscarPorCodigoExterno(codigo) {
-    const producto = await ProductoRepository.findByCodigoExterno(codigo);
-    if (!producto) throw new ErrorApi(404, "Producto no encontrado");
     return producto;
   }
 
