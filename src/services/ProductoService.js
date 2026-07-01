@@ -92,12 +92,13 @@ class ProductoService {
       ],
     });
 
-    // Stock inicial opcional: el admin elige sede + cantidad al crear.
-    if (datos.sedeId && Number(datos.stockInicial) > 0) {
+    // Se registra el stock (aunque sea 0) para que el producto aparezca
+    // al filtrar por esa sede; solo la cantidad inicial es opcional.
+    if (datos.sedeId) {
       await StockRepository.incrementarStock(
         producto._id,
         datos.sedeId,
-        Number(datos.stockInicial),
+        Number(datos.stockInicial) || 0,
       );
     }
 
