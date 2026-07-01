@@ -72,6 +72,15 @@ class ProductoController {
     return RespuestaApi.exito(reply, "Producto obtenido", { producto });
   }
 
+  async asignarUbicacion(request, reply) {
+    const producto = await ProductoService.asignarUbicacion(
+      request.params.id,
+      request.body,
+      request.usuarioId,
+    );
+    return RespuestaApi.exito(reply, "Ubicación asignada", { producto });
+  }
+
   async actualizar(request, reply) {
     const producto = await ProductoService.actualizarProducto(
       request.params.id,

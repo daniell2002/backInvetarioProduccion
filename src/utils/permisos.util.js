@@ -28,6 +28,7 @@ export const MODULOS = Object.freeze({
   ORDENES_DESPACHO: "ordenes_despacho",
   INVENTARIO: "inventario",
   VENTAS: "ventas",
+  RACKS: "racks",
 });
 
 export const ACCIONES_POR_MODULO = Object.freeze({
@@ -107,6 +108,12 @@ export const ACCIONES_POR_MODULO = Object.freeze({
     ACCIONES.VER,
     ACCIONES.CREAR,
     ACCIONES.ACTUALIZAR,
+  ],
+  [MODULOS.RACKS]: [
+    ACCIONES.VER,
+    ACCIONES.CREAR,
+    ACCIONES.ACTUALIZAR,
+    ACCIONES.ESTADO,
   ],
 });
 

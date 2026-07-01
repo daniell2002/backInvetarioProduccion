@@ -155,6 +155,31 @@ const schemaListarProductosPaginado = {
   },
 };
 
+const schemaAsignarUbicacionProducto = {
+  summary: "Asignar ubicación de rack a producto",
+  description: "Asigna (o quita, con rackId vacío) la posición de rack de un producto",
+  tags: ["Productos"],
+  security: [{ bearerAuth: [] }],
+  params: {
+    type: "object",
+    properties: { id: { type: "string" } },
+    required: ["id"],
+  },
+  body: {
+    type: "object",
+    properties: {
+      rackId: { type: "string" },
+      posicion: { type: "string", maxLength: 10 },
+    },
+    additionalProperties: false,
+  },
+  response: {
+    200: { description: "Ubicación asignada" },
+    400: { description: "Posición inválida" },
+    404: { description: "Producto o rack no encontrado" },
+  },
+};
+
 const schemaObtenerProducto = {
   summary: "Obtener producto",
   description: "Obtener producto por ID",
@@ -286,6 +311,7 @@ export {
   schemaListarProductosPaginado,
   schemaObtenerProducto,
   schemaBuscarProductoPorCodigo,
+  schemaAsignarUbicacionProducto,
   schemaActualizarProducto,
   schemaEliminarProducto,
   schemaActualizarEstadoProducto,

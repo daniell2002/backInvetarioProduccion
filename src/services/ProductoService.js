@@ -1,6 +1,8 @@
 import ProductoRepository from "../repositories/ProductoRepository.js";
+import RackRepository from "../repositories/RackRepository.js";
 import ErrorApi from "../utils/ErrorApi.js";
 import { generarCodigo } from "../utils/generadorCodigo.util.js";
+import { esPosicionValida } from "../utils/rackPosiciones.util.js";
 import { logAccionUsuario } from "../config/logger.js";
 import { crearTrazabilidad } from "../utils/trazabilidad.util.js";
 
@@ -65,6 +67,54 @@ class ProductoService {
     const producto = await ProductoRepository.findByCodigoExterno(codigo);
     if (!producto) throw new ErrorApi(404, "Producto no encontrado");
     return producto;
+  }
+
+  async asignarUbicacion(id, { rackId, posicion }, usuarioId) {
+    const producto = await ProductoRepository.findById(id);
+    if (!producto || !producto.activo)
+      throw new ErrorApi(404, "Producto no encontrado");
+
+    // Quitar ubicación: rackId vacío limpia el campo
+    if (!rackId) {
+      const actualizado = await ProductoRepository.updateById(id, {
+        $set: { ubicacion: { rackId: null, posicion: "" } },
+        $push: {
+          trazabilidad: crearTrazabilidad(usuarioId, "actualizacion", "Ubicación de rack removida"),
+        },
+      });
+      logAccionUsuario(usuarioId, "QUITAR_UBICACION_PRODUCTO", { productoId: id });
+      return actualizado;
+    }
+
+    const rack = await RackRepository.findById(rackId);
+    if (!rack || !rack.activo) throw new ErrorApi(404, "Rack no encontrado");
+
+    if (!esPosicionValida(posicion, rack.filas, rack.columnas)) {
+      throw new ErrorApi(
+        400,
+        `Posición "${posicion}" inválida para un rack de ${rack.filas} filas x ${rack.columnas} columnas`,
+      );
+    }
+
+    const posicionNormalizada = String(posicion).toUpperCase().trim();
+
+    const actualizado = await ProductoRepository.updateById(id, {
+      $set: { ubicacion: { rackId, posicion: posicionNormalizada } },
+      $push: {
+        trazabilidad: crearTrazabilidad(
+          usuarioId,
+          "actualizacion",
+          `Ubicación asignada: ${rack.nombre} ${posicionNormalizada}`,
+        ),
+      },
+    });
+
+    logAccionUsuario(usuarioId, "ASIGNAR_UBICACION_PRODUCTO", {
+      productoId: id,
+      rackId,
+      posicion: posicionNormalizada,
+    });
+    return actualizado;
   }
 
   async actualizarProducto(id, datos, usuarioId) {

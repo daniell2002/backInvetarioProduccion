@@ -64,6 +64,19 @@ const productoSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    ubicacion: {
+      rackId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Rack",
+        default: null,
+      },
+      posicion: {
+        type: String,
+        trim: true,
+        uppercase: true,
+        default: "",
+      },
+    },
     activo: {
       type: Boolean,
       default: true,
