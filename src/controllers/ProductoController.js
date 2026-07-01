@@ -36,6 +36,7 @@ class ProductoController {
       codigoInterno,
       codigoExterno,
       busqueda,
+      sedeId,
       incluirInactivos,
     } = request.query;
     const filtros = {};
@@ -45,6 +46,7 @@ class ProductoController {
     if (codigoInterno) filtros.codigoInterno = codigoInterno;
     if (codigoExterno) filtros.codigoExterno = codigoExterno;
     if (busqueda) filtros.busqueda = busqueda;
+    if (sedeId) filtros.sedeId = sedeId;
     filtros.incluirInactivos = this.resolverBoolean(incluirInactivos, false);
 
     const resultado = await ProductoService.obtenerProductosPaginado(

@@ -1,3 +1,22 @@
+const presentacionItemSchema = {
+  type: "object",
+  properties: {
+    tipo: { type: "string" },
+    unidadMedida: { type: "string", description: "Código de UnidadMedida, ej: 94, KGM, MTR" },
+    cantidadPorUnidad: { type: "number", minimum: 0 },
+    unidadContenido: { type: "string", description: "Código de UnidadMedida del contenido interno" },
+    cantidadInterna: { type: "number", minimum: 0 },
+    metrosLineales: { type: "number", minimum: 0 },
+    largoCm: { type: "number", minimum: 0 },
+    anchoCm: { type: "number", minimum: 0 },
+    altoCm: { type: "number", minimum: 0 },
+    espesorMm: { type: "number", minimum: 0 },
+    pesoKg: { type: "number", minimum: 0 },
+    descripcion: { type: "string", maxLength: 250 },
+  },
+  additionalProperties: false,
+};
+
 const schemaCrearProducto = {
   summary: "Crear producto",
   description: "Crear nuevo producto",
@@ -5,7 +24,7 @@ const schemaCrearProducto = {
   security: [{ bearerAuth: [] }],
   body: {
     type: "object",
-    required: ["nombre", "unidadMedidaId"],
+    required: ["nombre"],
     properties: {
       nombre: { type: "string", minLength: 2, maxLength: 150 },
       descripcion: { type: "string", maxLength: 500 },
@@ -13,10 +32,17 @@ const schemaCrearProducto = {
       categoriaId: { type: "string" },
       subcategoriaId: { type: "string" },
       unidadMedidaId: { type: "string", minLength: 24, maxLength: 24 },
+      presentaciones: {
+        type: "array",
+        items: presentacionItemSchema,
+        description: "Al menos una presentación es requerida si no se envía unidadMedidaId directo",
+      },
       valorUnitario: { type: "number", minimum: 0 },
       stockMinimo: { type: "number", minimum: 0 },
       stockMaximo: { type: "number", minimum: 0 },
       imagen: { type: "string" },
+      sedeId: { type: "string", description: "Sede donde registrar el stock inicial (opcional)" },
+      stockInicial: { type: "number", minimum: 0 },
     },
     additionalProperties: false,
   },
@@ -94,6 +120,10 @@ const schemaListarProductosPaginado = {
         type: "string",
         description:
           "Búsqueda libre: coincide contra nombre, código interno, código externo o referencia",
+      },
+      sedeId: {
+        type: "string",
+        description: "Solo productos con stock registrado en esta sede",
       },
       incluirInactivos: { type: "boolean", default: false },
     },
@@ -232,6 +262,7 @@ const schemaActualizarProducto = {
       categoriaId: { type: "string" },
       subcategoriaId: { type: "string" },
       unidadMedidaId: { type: "string", minLength: 24, maxLength: 24 },
+      presentaciones: { type: "array", items: presentacionItemSchema },
       valorUnitario: { type: "number", minimum: 0 },
       stockMinimo: { type: "number", minimum: 0 },
       stockMaximo: { type: "number", minimum: 0 },

@@ -8,10 +8,12 @@ const formatearVenta = (salida) => {
 };
 
 class VentaService {
-  async crearVenta(datos, usuarioId) {
+  async crearVenta(datos, usuarioId, usuarioActual = null) {
     const salida = await SalidaService.crearSalida(
       { ...datos, tipo: "venta" },
       usuarioId,
+      null,
+      usuarioActual,
     );
     return formatearVenta(salida);
   }
@@ -58,12 +60,12 @@ class VentaService {
     return formatearVenta(venta);
   }
 
-  async anularVenta(id, usuarioId) {
+  async anularVenta(id, usuarioId, usuarioActual = null) {
     const salida = await SalidaRepository.findById(id);
     if (!salida || salida.tipo !== "venta") {
       throw new ErrorApi(404, "Venta no encontrada");
     }
-    const anulada = await SalidaService.anularSalida(id, usuarioId);
+    const anulada = await SalidaService.anularSalida(id, usuarioId, usuarioActual);
     return formatearVenta(anulada);
   }
 }

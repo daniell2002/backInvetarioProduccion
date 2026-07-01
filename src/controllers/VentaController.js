@@ -6,6 +6,7 @@ class VentaController {
     const venta = await VentaService.crearVenta(
       request.body,
       request.usuarioId,
+      request.usuario,
     );
     return RespuestaApi.exito(reply, "Venta registrada", { venta }, 201);
   }
@@ -42,6 +43,7 @@ class VentaController {
     const venta = await VentaService.anularVenta(
       request.params.id,
       request.usuarioId,
+      request.usuario,
     );
     return RespuestaApi.exito(reply, "Venta anulada", { venta });
   }
