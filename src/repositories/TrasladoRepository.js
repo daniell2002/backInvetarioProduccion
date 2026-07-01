@@ -24,6 +24,7 @@ class TrasladoRepository extends BaseRepository {
       this.model.countDocuments(consulta),
     ]);
 
+    
     return {
       datos,
       paginacion: {
