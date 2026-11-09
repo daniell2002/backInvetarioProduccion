@@ -6,6 +6,7 @@ import SedeRepository from "../repositories/SedeRepository.js";
 import RefreshTokenRepository from "../repositories/RefreshTokenRepository.js";
 import ErrorApi from "../utils/ErrorApi.js";
 import { logAccionUsuario, logError } from "../config/logger.js";
+import { generarTodosLosPermisos } from "../utils/permisos.util.js";
 
 class AuthService {
   async construirUsuarioSesion(usuario) {
@@ -14,7 +15,10 @@ class AuthService {
     // otro usuario), sin excepción.
     let permisos = [];
 
-    if (usuario.rolId) {
+    // El superadmin tiene todos los permisos, sin depender de su rol.
+    if (usuario.esSuperAdmin) {
+      permisos = generarTodosLosPermisos();
+    } else if (usuario.rolId) {
       const rol = await RolRepository.findById(usuario.rolId);
       if (rol?.activo && Array.isArray(rol.permisos)) {
         permisos = rol.permisos;
@@ -34,7 +38,8 @@ class AuthService {
       id: usuario._id,
       nombre: usuario.nombre,
       email: usuario.email,
-      esAdmin: usuario.esAdmin,
+      esAdmin: usuario.esAdmin === true || usuario.esSuperAdmin === true,
+      esSuperAdmin: usuario.esSuperAdmin === true,
       rolId: usuario.rolId,
       sedeId,
       debeCambiarContrasena: usuario.debeCambiarContrasena,

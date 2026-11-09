@@ -1,5 +1,6 @@
 import VentaService from "../services/VentaService.js";
 import RespuestaApi from "../utils/RespuestaApi.js";
+import { limitarFiltrosASede, verificarLecturaSede } from "../utils/accesoSede.util.js";
 
 class VentaController {
   async crear(request, reply) {
@@ -26,16 +27,19 @@ class VentaController {
     if (fechaDesde) filtros.fechaDesde = fechaDesde;
     if (fechaHasta) filtros.fechaHasta = fechaHasta;
 
+    const filtrosSede = limitarFiltrosASede(request.usuario, filtros);
+
     const resultado = await VentaService.obtenerVentasPaginado(
       Number(pagina),
       Number(limite),
-      filtros,
+      filtrosSede,
     );
     return RespuestaApi.exito(reply, "Ventas obtenidas", resultado);
   }
 
   async obtenerPorId(request, reply) {
     const venta = await VentaService.obtenerVentaPorId(request.params.id);
+    verificarLecturaSede(request.usuario, venta, ["sedeId"]);
     return RespuestaApi.exito(reply, "Venta obtenida", { venta });
   }
 

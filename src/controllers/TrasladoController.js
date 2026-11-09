@@ -1,5 +1,6 @@
 import TrasladoService from "../services/TrasladoService.js";
 import RespuestaApi from "../utils/RespuestaApi.js";
+import { limitarFiltrosASede, verificarLecturaSede } from "../utils/accesoSede.util.js";
 
 class TrasladoController {
   async crear(request, reply) {
@@ -16,7 +17,9 @@ class TrasladoController {
   }
 
   async listar(request, reply) {
-    const traslados = await TrasladoService.obtenerTraslados();
+    const traslados = await TrasladoService.obtenerTraslados(
+      limitarFiltrosASede(request.usuario, {}),
+    );
     return RespuestaApi.exito(reply, "Traslados obtenidos", { traslados });
   }
 
@@ -35,10 +38,12 @@ class TrasladoController {
     if (sedeId) filtros.sedeId = sedeId;
     if (estado) filtros.estado = estado;
 
+    const filtrosSede = limitarFiltrosASede(request.usuario, filtros);
+
     const resultado = await TrasladoService.obtenerTrasladosPaginado(
       Number(pagina),
       Number(limite),
-      filtros,
+      filtrosSede,
     );
     return RespuestaApi.exito(reply, "Traslados obtenidos", {
       traslados: resultado.documentos || [],
@@ -50,6 +55,7 @@ class TrasladoController {
     const traslado = await TrasladoService.obtenerTrasladoPorId(
       request.params.id,
     );
+    verificarLecturaSede(request.usuario, traslado, ["sedeOrigenId", "sedeDestinoId"]);
     return RespuestaApi.exito(reply, "Traslado obtenido", { traslado });
   }
 

@@ -12,7 +12,7 @@ class UsuarioController {
   async crear(request, reply) {
     const resultado = await UsuarioService.crearUsuario(
       request.body,
-      request.usuarioId,
+      request.usuarioId, request.usuario,
     );
     return RespuestaApi.exito(
       reply,
@@ -70,13 +70,13 @@ class UsuarioController {
     const usuario = await UsuarioService.actualizarUsuario(
       request.params.id,
       request.body,
-      request.usuarioId,
+      request.usuarioId, request.usuario,
     );
     return RespuestaApi.exito(reply, "Usuario actualizado", { usuario });
   }
 
   async eliminar(request, reply) {
-    await UsuarioService.eliminarUsuario(request.params.id, request.usuarioId);
+    await UsuarioService.eliminarUsuario(request.params.id, request.usuarioId, request.usuario);
     return RespuestaApi.exito(reply, "Usuario desactivado exitosamente");
   }
 
@@ -84,7 +84,7 @@ class UsuarioController {
     const usuario = await UsuarioService.actualizarEstadoUsuario(
       request.params.id,
       request.body?.activo,
-      request.usuarioId,
+      request.usuarioId, request.usuario,
     );
     return RespuestaApi.exito(reply, "Estado de usuario actualizado", {
       usuario,
@@ -94,7 +94,7 @@ class UsuarioController {
   async eliminarFisico(request, reply) {
     await UsuarioService.eliminarUsuarioFisico(
       request.params.id,
-      request.usuarioId,
+      request.usuarioId, request.usuario,
     );
     return RespuestaApi.exito(reply, "Usuario eliminado permanentemente");
   }

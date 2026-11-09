@@ -32,19 +32,19 @@ class ImportacionProductoController {
     }
 
     if (!buffer || buffer.length === 0) {
-      throw new ErrorApi("No se recibió ningún archivo", 400);
+      throw new ErrorApi(400, "No se recibió ningún archivo");
     }
 
     const extensionValida = /\.(xlsx|xls|csv)$/i.test(nombreArchivo);
     if (!extensionValida) {
       throw new ErrorApi(
-        "Formato de archivo no soportado. Use .xlsx, .xls o .csv",
         400,
+        "Formato de archivo no soportado. Use .xlsx, .xls o .csv",
       );
     }
 
     if (!sedeId) {
-      throw new ErrorApi("El campo sedeId es obligatorio", 400);
+      throw new ErrorApi(400, "El campo sedeId es obligatorio");
     }
 
     const esAdminGeneral = Boolean(request.usuario?.esAdmin);
@@ -56,15 +56,15 @@ class ImportacionProductoController {
     if (!esAdminGeneral) {
       if (!sedeUsuario) {
         throw new ErrorApi(
-          "Tu usuario no tiene sede asignada para importar inventario",
           403,
+          "Tu usuario no tiene sede asignada para importar inventario",
         );
       }
 
       if (sedeId && String(sedeId) !== String(sedeUsuario)) {
         throw new ErrorApi(
-          "Solo puedes importar inventario en tu propia sede",
           403,
+          "Solo puedes importar inventario en tu propia sede",
         );
       }
 

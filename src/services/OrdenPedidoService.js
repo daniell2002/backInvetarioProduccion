@@ -50,7 +50,7 @@ class OrdenPedidoService {
   }
 
   async obtenerPedidos(filtros = {}) {
-    return await OrdenPedidoRepository.findAll(filtros);
+    return await OrdenPedidoRepository.findAll(OrdenPedidoRepository.construirFiltros(filtros));
   }
 
   async obtenerPedidoPorId(id) {

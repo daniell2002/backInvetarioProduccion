@@ -17,6 +17,10 @@ export const verificarPermiso = (modulo, accion) => {
 
     const { rolId } = request.usuario;
 
+    // El superadmin tiene todos los permisos sin depender de su rol: así
+    // nunca queda bloqueado si el rol se edita o aparecen módulos nuevos.
+    if (request.usuario.esSuperAdmin) return;
+
     // "esAdmin" solo habilita operar entre sedes (ver soloAdmin más abajo
     // y las rutas que inyectan sedeUsuario). Los permisos por módulo/acción
     // siempre se determinan por el rol asignado, sin excepción.
@@ -52,5 +56,15 @@ export const soloAdmin = async (request, reply) => {
   if (!request.usuarioId) throw new ErrorApi(401, "No autenticado");
   if (!request.usuario.esAdmin) {
     throw new ErrorApi(403, "Acceso exclusivo de administrador");
+  }
+};
+
+/**
+ * Hook que restringe el acceso solo al superadmin.
+ */
+export const soloSuperAdmin = async (request, reply) => {
+  if (!request.usuarioId) throw new ErrorApi(401, "No autenticado");
+  if (!request.usuario.esSuperAdmin) {
+    throw new ErrorApi(403, "Acceso exclusivo del superadministrador");
   }
 };

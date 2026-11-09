@@ -20,7 +20,32 @@ class UsuarioService {
   /**
    * Crear usuario — Solo admin. Genera contraseña temporal y la envía por correo.
    */
-  async crearUsuario(datos, adminId) {
+  /**
+   * Quién puede gestionar a quién. `actor` es request.usuario; si no viene
+   * (llamadas internas: seed, scripts) no se aplican estas reglas.
+   * - Al superadmin nadie lo desactiva ni elimina; solo él edita su cuenta.
+   * - Solo el superadmin gestiona administradores.
+   */
+  verificarPuedeGestionar(objetivo, actor, accion) {
+    if (!actor || !objetivo) return;
+    if (objetivo.esSuperAdmin && accion !== "editar") {
+      throw new ErrorApi(403, "El superadministrador no se puede desactivar ni eliminar");
+    }
+    if (objetivo.esSuperAdmin && !actor.esSuperAdmin) {
+      throw new ErrorApi(403, "Solo el superadministrador puede modificar su cuenta");
+    }
+    if (objetivo.esAdmin && !actor.esSuperAdmin) {
+      throw new ErrorApi(403, "Solo el superadministrador puede gestionar administradores");
+    }
+  }
+
+  async crearUsuario(datos, adminId, actor = null) {
+    // esSuperAdmin nunca se asigna desde la API (solo seed/script).
+    delete datos.esSuperAdmin;
+    if (actor && datos.esAdmin && !actor.esSuperAdmin) {
+      throw new ErrorApi(403, "Solo el superadministrador puede crear administradores");
+    }
+
     const existente = await UsuarioRepository.findByEmail(datos.email);
     if (existente)
       throw new ErrorApi(400, "Ya existe un usuario con ese email");
@@ -88,10 +113,32 @@ class UsuarioService {
     return usuario;
   }
 
-  async actualizarUsuario(id, datos, adminId) {
+  async actualizarUsuario(id, datos, adminId, actor = null) {
     const usuario = await UsuarioRepository.findById(id);
     if (!usuario || !usuario.activo)
       throw new ErrorApi(404, "Usuario no encontrado");
+
+    delete datos.esSuperAdmin;
+    // Editar la propia cuenta (nombre/email) se permite; sus límites van abajo.
+    const esPropia = String(usuario._id) === String(adminId);
+    if (!esPropia) this.verificarPuedeGestionar(usuario, actor, "editar");
+    if (actor && !actor.esSuperAdmin) {
+      const cambiaAdmin = datos.esAdmin !== undefined && Boolean(datos.esAdmin) !== Boolean(usuario.esAdmin);
+      if (cambiaAdmin) {
+        throw new ErrorApi(403, "Solo el superadministrador puede dar o quitar el rol de administrador");
+      }
+      // Nadie se cambia a sí mismo rol o sede (evita que se suba privilegios).
+      if (esPropia) {
+        const cambia = (campo) =>
+          datos[campo] !== undefined &&
+          String(this.normalizarIdRelacion(datos[campo], true) ?? "") !== String(usuario[campo] ?? "");
+        if (cambia("rolId") || cambia("sedeId")) {
+          throw new ErrorApi(403, "No puedes cambiar tu propio rol o sede");
+        }
+      }
+    }
+    // El superadmin siempre es admin.
+    if (usuario.esSuperAdmin) datos.esAdmin = true;
 
     // Si cambia email, verificar que no exista
     if (datos.email && datos.email !== usuario.email) {
@@ -124,8 +171,9 @@ class UsuarioService {
     return actualizado;
   }
 
-  async eliminarUsuario(id, adminId) {
+  async eliminarUsuario(id, adminId, actor = null) {
     const usuario = await UsuarioRepository.findById(id);
+    this.verificarPuedeGestionar(usuario, actor, "desactivar");
     if (!usuario || !usuario.activo)
       throw new ErrorApi(404, "Usuario no encontrado");
 
@@ -146,9 +194,10 @@ class UsuarioService {
     logAccionUsuario(adminId, "ELIMINAR_USUARIO", { usuarioEliminado: id });
   }
 
-  async actualizarEstadoUsuario(id, activo, adminId) {
+  async actualizarEstadoUsuario(id, activo, adminId, actor = null) {
     const usuario = await UsuarioRepository.findById(id);
     if (!usuario) throw new ErrorApi(404, "Usuario no encontrado");
+    this.verificarPuedeGestionar(usuario, actor, "desactivar");
 
     if (usuario._id.toString() === adminId && activo === false) {
       throw new ErrorApi(400, "No puedes desactivar tu propia cuenta");
@@ -179,9 +228,10 @@ class UsuarioService {
     return actualizado;
   }
 
-  async eliminarUsuarioFisico(id, adminId) {
+  async eliminarUsuarioFisico(id, adminId, actor = null) {
     const usuario = await UsuarioRepository.findById(id);
     if (!usuario) throw new ErrorApi(404, "Usuario no encontrado");
+    this.verificarPuedeGestionar(usuario, actor, "eliminar");
 
     if (usuario._id.toString() === adminId) {
       throw new ErrorApi(400, "No puedes eliminar tu propia cuenta");

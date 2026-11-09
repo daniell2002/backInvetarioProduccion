@@ -1,5 +1,6 @@
 import SalidaService from "../services/SalidaService.js";
 import RespuestaApi from "../utils/RespuestaApi.js";
+import { limitarFiltrosASede, verificarLecturaSede } from "../utils/accesoSede.util.js";
 
 class SalidaController {
   async crear(request, reply) {
@@ -13,7 +14,9 @@ class SalidaController {
   }
 
   async listar(request, reply) {
-    const salidas = await SalidaService.obtenerSalidas();
+    const salidas = await SalidaService.obtenerSalidas(
+      limitarFiltrosASede(request.usuario, {}),
+    );
     return RespuestaApi.exito(reply, "Salidas obtenidas", { salidas });
   }
 
@@ -36,10 +39,12 @@ class SalidaController {
     if (fechaDesde) filtros.fechaDesde = fechaDesde;
     if (fechaHasta) filtros.fechaHasta = fechaHasta;
 
+    const filtrosSede = limitarFiltrosASede(request.usuario, filtros);
+
     const resultado = await SalidaService.obtenerSalidasPaginado(
       Number(pagina),
       Number(limite),
-      filtros,
+      filtrosSede,
     );
     return RespuestaApi.exito(reply, "Salidas obtenidas", {
       salidas: resultado.documentos || [],
@@ -49,6 +54,7 @@ class SalidaController {
 
   async obtenerPorId(request, reply) {
     const salida = await SalidaService.obtenerSalidaPorId(request.params.id);
+    verificarLecturaSede(request.usuario, salida, ["sedeId"]);
     return RespuestaApi.exito(reply, "Salida obtenida", { salida });
   }
 

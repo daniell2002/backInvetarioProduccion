@@ -4,7 +4,10 @@ import { logAccionUsuario } from "../config/logger.js";
 import { crearTrazabilidad } from "../utils/trazabilidad.util.js";
 
 class RolService {
-  async crearRol(datos, adminId) {
+  async crearRol(datos, adminId, actor = null) {
+    if (actor && datos.esPredeterminado && !actor.esSuperAdmin) {
+      throw new ErrorApi(403, "Solo el superadministrador puede crear roles predeterminados");
+    }
     const existente = await RolRepository.findByNombre(datos.nombre);
     if (existente) throw new ErrorApi(400, "Ya existe un rol con ese nombre");
 
@@ -53,9 +56,20 @@ class RolService {
     return rol;
   }
 
-  async actualizarRol(id, datos, adminId) {
+  async actualizarRol(id, datos, adminId, actor = null) {
     const rol = await RolRepository.findById(id);
     if (!rol || !rol.activo) throw new ErrorApi(404, "Rol no encontrado");
+
+    // El rol predeterminado (Administrador) solo lo edita el superadmin, y
+    // solo el superadmin cambia qué rol es predeterminado.
+    if (actor && !actor.esSuperAdmin) {
+      if (rol.esPredeterminado) {
+        throw new ErrorApi(403, "Solo el superadministrador puede modificar el rol predeterminado");
+      }
+      if (datos.esPredeterminado !== undefined && Boolean(datos.esPredeterminado) !== Boolean(rol.esPredeterminado)) {
+        throw new ErrorApi(403, "Solo el superadministrador puede marcar roles como predeterminados");
+      }
+    }
 
     // Si cambia nombre, verificar duplicado
     if (datos.nombre && datos.nombre !== rol.nombre) {
@@ -80,6 +94,9 @@ class RolService {
 
   async eliminarRol(id, adminId) {
     const rol = await RolRepository.findById(id);
+    if (rol?.esPredeterminado) {
+      throw new ErrorApi(403, "El rol predeterminado no se puede desactivar ni eliminar");
+    }
     if (!rol || !rol.activo) throw new ErrorApi(404, "Rol no encontrado");
 
     await RolRepository.updateById(id, {
@@ -117,6 +134,9 @@ class RolService {
 
   async eliminarRolFisico(id, adminId) {
     const rol = await RolRepository.findById(id);
+    if (rol?.esPredeterminado) {
+      throw new ErrorApi(403, "El rol predeterminado no se puede desactivar ni eliminar");
+    }
     if (!rol) throw new ErrorApi(404, "Rol no encontrado");
 
     await RolRepository.deleteById(id);

@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import dotenv from "dotenv";
 import Rol from "../models/Rol.js";
 import Usuario from "../models/Usuario.js";
+import { conectarDB } from "../config/db.js";
 import { generarTodosLosPermisos } from "../utils/permisos.util.js";
 import { crearTrazabilidad } from "../utils/trazabilidad.util.js";
 
@@ -14,7 +15,7 @@ const ADMIN_NOMBRE = process.env.ADMIN_NOMBRE || "Administrador";
 
 async function seed() {
   try {
-    await mongoose.connect(process.env.MONGO_URI);
+    await conectarDB(); // aplica la protección de ENTORNO=local
     console.log("✔ Conectado a MongoDB");
 
     // ─── Rol Administrador ───────────────────────────────────
@@ -47,6 +48,7 @@ async function seed() {
         passwordHash,
         rolId: rolAdmin._id,
         esAdmin: true,
+        esSuperAdmin: true, // dueño del sistema (ver modelo Usuario)
         debeCambiarContrasena: false,
         activo: true,
       });

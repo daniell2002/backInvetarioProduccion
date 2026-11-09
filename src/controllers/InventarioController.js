@@ -20,7 +20,12 @@ class InventarioController {
       throw new ErrorApi(403, "Tu usuario no tiene sede asignada");
     }
 
-    // No-admin con sede: solo puede consultar su propia sede, ignora el param de URL
+    // No-admin con sede: solo puede consultar su propia sede. Antes se
+    // ignoraba el param de URL y se devolvía su sede sin avisar: el front
+    // mostraba ese número como si fuera el stock de la otra sede (pedidos).
+    if (!esAdmin && String(request.params.sedeId) !== sedeIdUsuario) {
+      throw new ErrorApi(403, "Solo puedes consultar el inventario de tu sede");
+    }
     const sedeId = esAdmin ? request.params.sedeId : sedeIdUsuario;
 
     const { productoId, productoIds } = request.query;

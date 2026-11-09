@@ -1,5 +1,6 @@
 import AjusteInventarioService from "../services/AjusteInventarioService.js";
 import RespuestaApi from "../utils/RespuestaApi.js";
+import { limitarFiltrosASede, verificarLecturaSede } from "../utils/accesoSede.util.js";
 
 class AjusteInventarioController {
   async crear(request, reply) {
@@ -17,7 +18,9 @@ class AjusteInventarioController {
   }
 
   async listar(request, reply) {
-    const ajustes = await AjusteInventarioService.obtenerAjustes();
+    const ajustes = await AjusteInventarioService.obtenerAjustes(
+      limitarFiltrosASede(request.usuario, {}),
+    );
     return RespuestaApi.exito(reply, "Ajustes obtenidos", { ajustes });
   }
 
@@ -27,10 +30,12 @@ class AjusteInventarioController {
     if (sedeId) filtros.sedeId = sedeId;
     if (estado) filtros.estado = estado;
 
+    const filtrosSede = limitarFiltrosASede(request.usuario, filtros);
+
     const resultado = await AjusteInventarioService.obtenerAjustesPaginado(
       Number(pagina),
       Number(limite),
-      filtros,
+      filtrosSede,
     );
     return RespuestaApi.exito(reply, "Ajustes obtenidos", {
       ajustes: resultado.documentos || [],
@@ -42,6 +47,7 @@ class AjusteInventarioController {
     const ajuste = await AjusteInventarioService.obtenerAjustePorId(
       request.params.id,
     );
+    verificarLecturaSede(request.usuario, ajuste, ["sedeId"]);
     return RespuestaApi.exito(reply, "Ajuste obtenido", { ajuste });
   }
 

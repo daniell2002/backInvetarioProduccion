@@ -13,7 +13,7 @@ class UnidadMedidaService {
    */
   async sincronizarDesdeArchivo() {
     if (!Array.isArray(unitMeasures) || unitMeasures.length === 0) {
-      throw new ErrorApi("El archivo de unidades de medida está vacío", 500);
+      throw new ErrorApi(500, "El archivo de unidades de medida está vacío");
     }
 
     const unidades = unitMeasures.map((u) => ({
@@ -40,7 +40,7 @@ class UnidadMedidaService {
 
   async obtenerPorId(id) {
     const unidad = await UnidadMedidaRepository.findById(id);
-    if (!unidad) throw new ErrorApi("Unidad de medida no encontrada", 404);
+    if (!unidad) throw new ErrorApi(404, "Unidad de medida no encontrada");
     return unidad;
   }
 }

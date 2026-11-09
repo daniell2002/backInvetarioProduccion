@@ -7,7 +7,10 @@
   "scripts": {
     "dev": "node --watch server.js",
     "start": "node server.js",
-    "seed": "node src/seeds/seed.js"
+    "seed": "node src/seeds/seed.js",
+    "dev:local": "node --env-file=.env.local --watch server.js",
+    "start:local": "node --env-file=.env.local server.js",
+    "seed:local": "node --env-file=.env.local src/seeds/seed.js"
   },
   "keywords": [
     "inventario",

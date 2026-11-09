@@ -1,0 +1,15 @@
+# Configuraciones locales/de pruebas: nunca dentro de la imagen.
+# (.env NO se excluye a propósito: hoy el despliegue puede depender de él.
+#  Lo ideal es que el servidor reciba sus variables por su cuenta y
+#  agregar .env aquí también; confirmar antes cómo se despliega.)
+.env.*
+!.env.example
+node_modules
+npm-debug.log*
+logs
+*.log
+.git
+.vscode
+.idea
+coverage
+tmp

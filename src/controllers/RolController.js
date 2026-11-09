@@ -10,7 +10,7 @@ class RolController {
   }
 
   async crear(request, reply) {
-    const rol = await RolService.crearRol(request.body, request.usuarioId);
+    const rol = await RolService.crearRol(request.body, request.usuarioId, request.usuario);
     return RespuestaApi.exito(reply, "Rol creado exitosamente", { rol }, 201);
   }
 
@@ -54,7 +54,7 @@ class RolController {
     const rol = await RolService.actualizarRol(
       request.params.id,
       request.body,
-      request.usuarioId,
+      request.usuarioId, request.usuario,
     );
     return RespuestaApi.exito(reply, "Rol actualizado", { rol });
   }

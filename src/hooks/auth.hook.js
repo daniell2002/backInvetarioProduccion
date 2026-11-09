@@ -18,7 +18,7 @@ export const autenticar = async (request, reply) => {
   }
 
   const actual = await Usuario.findById(request.user.id)
-    .select("sedeId rolId esAdmin activo debeCambiarContrasena")
+    .select("sedeId rolId esAdmin esSuperAdmin activo debeCambiarContrasena")
     .lean();
   if (!actual || actual.activo === false) {
     throw new ErrorApi(401, "Usuario inactivo o inexistente");
@@ -35,6 +35,8 @@ export const autenticar = async (request, reply) => {
     ...request.user,
     sedeId: actual.sedeId ? String(actual.sedeId) : null,
     rolId: actual.rolId ? String(actual.rolId) : null,
-    esAdmin: actual.esAdmin === true,
+    // Un superadmin siempre es también admin (opera todas las sedes).
+    esAdmin: actual.esAdmin === true || actual.esSuperAdmin === true,
+    esSuperAdmin: actual.esSuperAdmin === true,
   };
 };

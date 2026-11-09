@@ -35,6 +35,13 @@ const usuarioSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    // Dueño del sistema: todos los permisos sin depender del rol, todas las
+    // sedes, y no se puede desactivar, eliminar ni degradar desde la API.
+    // Solo se asigna con el seed o con scripts/migrar-superadmin.js.
+    esSuperAdmin: {
+      type: Boolean,
+      default: false,
+    },
     debeCambiarContrasena: {
       type: Boolean,
       default: true,

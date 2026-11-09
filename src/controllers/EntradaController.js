@@ -1,5 +1,6 @@
 import EntradaService from "../services/EntradaService.js";
 import RespuestaApi from "../utils/RespuestaApi.js";
+import { limitarFiltrosASede, verificarLecturaSede } from "../utils/accesoSede.util.js";
 
 class EntradaController {
   async crear(request, reply) {
@@ -13,7 +14,9 @@ class EntradaController {
   }
 
   async listar(request, reply) {
-    const entradas = await EntradaService.obtenerEntradas();
+    const entradas = await EntradaService.obtenerEntradas(
+      limitarFiltrosASede(request.usuario, {}),
+    );
     return RespuestaApi.exito(reply, "Entradas obtenidas", { entradas });
   }
 
@@ -36,10 +39,12 @@ class EntradaController {
     if (fechaDesde) filtros.fechaDesde = fechaDesde;
     if (fechaHasta) filtros.fechaHasta = fechaHasta;
 
+    const filtrosSede = limitarFiltrosASede(request.usuario, filtros);
+
     const resultado = await EntradaService.obtenerEntradasPaginado(
       Number(pagina),
       Number(limite),
-      filtros,
+      filtrosSede,
     );
     return RespuestaApi.exito(reply, "Entradas obtenidas", {
       entradas: resultado.documentos || [],
@@ -49,6 +54,7 @@ class EntradaController {
 
   async obtenerPorId(request, reply) {
     const entrada = await EntradaService.obtenerEntradaPorId(request.params.id);
+    verificarLecturaSede(request.usuario, entrada, ["sedeId"]);
     return RespuestaApi.exito(reply, "Entrada obtenida", { entrada });
   }
 

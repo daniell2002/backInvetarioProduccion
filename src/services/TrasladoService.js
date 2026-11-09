@@ -203,7 +203,7 @@ class TrasladoService {
   }
 
   async obtenerTraslados(filtros = {}) {
-    return await TrasladoRepository.findAll(filtros);
+    return await TrasladoRepository.findAll(TrasladoRepository.construirFiltros(filtros));
   }
 
   async obtenerTrasladoPorId(id) {

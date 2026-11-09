@@ -1,5 +1,6 @@
 import OrdenPedidoService from "../services/OrdenPedidoService.js";
 import RespuestaApi from "../utils/RespuestaApi.js";
+import { limitarFiltrosASede, verificarLecturaSede } from "../utils/accesoSede.util.js";
 
 class OrdenPedidoController {
   async crear(request, reply) {
@@ -11,7 +12,9 @@ class OrdenPedidoController {
   }
 
   async listar(request, reply) {
-    const pedidos = await OrdenPedidoService.obtenerPedidos();
+    const pedidos = await OrdenPedidoService.obtenerPedidos(
+      limitarFiltrosASede(request.usuario, {}),
+    );
     return RespuestaApi.exito(reply, "Pedidos obtenidos", { pedidos });
   }
 
@@ -30,10 +33,12 @@ class OrdenPedidoController {
     if (sedeId) filtros.sedeId = sedeId;
     if (estado) filtros.estado = estado;
 
+    const filtrosSede = limitarFiltrosASede(request.usuario, filtros);
+
     const resultado = await OrdenPedidoService.obtenerPedidosPaginado(
       Number(pagina),
       Number(limite),
-      filtros,
+      filtrosSede,
     );
     return RespuestaApi.exito(reply, "Pedidos obtenidos", {
       pedidos: resultado.documentos || [],
@@ -45,6 +50,7 @@ class OrdenPedidoController {
     const pedido = await OrdenPedidoService.obtenerPedidoPorId(
       request.params.id,
     );
+    verificarLecturaSede(request.usuario, pedido, ["sedeSolicitanteId", "sedeProveedoraId"]);
     return RespuestaApi.exito(reply, "Pedido obtenido", { pedido });
   }
 
